@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+  <meta charset="utf-8">
+  <title>الطلبيات - EbaaStore25</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="wrapper">
+    <header class="card">
+      <h1>الطلبيات</h1>
+      <nav>
+        <a href="index.html">الرئيسية</a>
+        <a href="inventory.html">المخزون</a>
+        <a href="orders.html">الطلبيات</a>
+        <a href="finances.html">المصروفات والإيرادات</a>
+      </nav>
+    </header>
+
+    <div class="card">
+      <h2>اختيار منتجات للطلب</h2>
+      <p class="small">ضع الكمية المطلوبة لكل منتج ثم أدخل اسم الزبون واضغط تأكيد</p>
+
+      <div id="orderProducts" class="products-grid"></div>
+
+      <div style="margin-top:12px;">
+        <input type="text" id="customerName" placeholder="اسم الزبون">
+        <button class="primary" onclick="confirmOrder()">✅ تأكيد الطلب</button>
+      </div>
+
+      <div id="orderMsg" class="alert"></div>
+    </div>
+
+    <div class="card">
+      <h2>سجل الطلبيات</h2>
+      <ul id="ordersList" class="table-list"></ul>
+    </div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js";
+    import { getDatabase, ref, onValue, push, set, update, get, child } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-database.js";
+
+    const firebaseConfig = {
+      apiKey: "YOUR_API_KEY",
+      authDomain: "ebaastore25.firebaseapp.com",
+      databaseURL: "https://ebaastore25-default-rtdb.europe-west1.firebasedatabase.app/",
+      projectId: "ebaastore25",
+      storageBucket: "ebaastore25.appspot.com",
+      messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+      appId: "YOUR_APP_ID"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    let productsCache = {}; // cache للمنتجات
+
+    function loadOrderProducts(){
+      const pRef = ref(db, "inventory");
+      onValue(pRef, (snap) => {
+        const container = document.getElementById("orderProducts");
+        container.innerHTML = "";
+        productsCache = {};
+        if(!snap.exists()) return;
+        snap.forEach(child => {
+          const id = child.key;
+          const data = child.val();
+          productsCache[id] = data;
+          const div = document.createElement("div");
+          div.className = "product";
+          div.innerHTML = `
+            <img src="${data.image}" alt="${data.name}">
+            <h3>${data.name}</h3>
+            <p class="small">السعر: ${data.price}</p>
+            <p>المتاح: ${data.quantity}</p>
+            <input type="number" min="0" value="0" id="order_qty_${id}" style="width:70px; text-align:center;">
+          `;
+          container.appendChild(div);
+        });
+      });
+    }
+
+    async function confirmOrder(){
+      const customer = document.getElementById("customerName").value.trim();
+      if(!customer){
+        document.getElementById("orderMsg").innerText = "الرجاء إدخال اسم الزبون.";
+        return;
+      }
+
+      // جمع العناصر المطلوبة
+      const items = [];
+      let total = 0;
+      for(const id in productsCache){
+        const q = Number(document.getElementById(`order_qty_${id}`)?.value || 0);
+        if(q > 0){
+          const prod = productsCache[id];
+          if(q > prod.quantity){
+            document.getElementById("orderMsg").innerText = `الكمية المطلوبة للمنتج "${prod.name}" أكبر من المتاح.`;
+            return;
+          }
+          items.push({ id, name: prod.name, qty: q, price: prod.price });
+          total += q * Number(prod.price);
+        }
+      }
+
+      if(items.length === 0){
+        document.getElementById("orderMsg").innerText = "اختر منتجًا واحدًا على الأقل.";
+        return;
+      }
+
+      // عملية التحديث: نقص الكميات ثم حفظ الطلب
+      // أولاً نحدث كل منتج
+      for(const it of items){
+        const prodRef = ref(db, `inventory/${it.id}`);
+        const snap = await get(prodRef);
+        if(!snap.exists()){
+          document.getElementById("orderMsg").innerText = `المنتج ${it.name} غير متاح الآن.`;
+          return;
+        }
+        const current = Number(snap.val().quantity || 0);
+        const next = current - it.qty;
+        if(next <= 0){
+          // نحذف العقدة
+          await set(prodRef, null); // مساوي للحذف
+        } else {
+          await update(prodRef, { quantity: next });
+        }
+      }
+
+      // حفظ الطلب في orders
+      const newRef = push(ref(db, "orders"));
+      await set(newRef, {
+        customer,
+        items,
+        total,
+        date: new Date().toLocaleString()
+      });
+
+      document.getElementById("orderMsg").innerText = "تم تأكيد الطلب ✅";
+      document.getElementById("customerName").value = "";
+      // إعادة تعبئة الكميات للصفر
+      for(const it of items){
+        const el = document.getElementById(`order_qty_${it.id}`);
+        if(el) el.value = 0;
+      }
+    }
+
+    // load orders list
+    function loadOrders(){
+      const oRef = ref(db, "orders");
+      onValue(oRef, (snap) => {
+        const list = document.getElementById("ordersList");
+        list.innerHTML = "";
+        if(!snap.exists()) return;
+        snap.forEach(child => {
+          const o = child.val();
+          const li = document.createElement("li");
+          li.innerHTML = `<div style="text-align:right;">
+            <strong>${o.customer}</strong> — ${o.date} <br> الإجمالي: ${o.total}
+            <div style="font-size:13px; color:#6b5b5f; margin-top:6px;">
+              ${o.items.map(it => `${it.name} x${it.qty}`).join(" ، ")}
+            </div>
+          </div>`;
+          list.appendChild(li);
+        });
+      });
+    }
+
+    window.confirmOrder = confirmOrder;
+
+    loadOrderProducts();
+    loadOrders();
+  </script>
+</body>
+</html>

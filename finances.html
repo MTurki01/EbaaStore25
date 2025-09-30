@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+  <meta charset="utf-8">
+  <title>المصروفات والإيرادات - EbaaStore25</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="wrapper">
+    <header class="card">
+      <h1>المصروفات والإيرادات</h1>
+      <nav>
+        <a href="index.html">الرئيسية</a>
+        <a href="inventory.html">المخزون</a>
+        <a href="orders.html">الطلبيات</a>
+        <a href="finances.html">المصروفات والإيرادات</a>
+      </nav>
+    </header>
+
+    <div class="card">
+      <h2>إضافة مصروف</h2>
+      <div class="controls">
+        <input type="text" id="expReason" placeholder="سبب الصرف">
+        <input type="number" id="expAmount" placeholder="القيمة">
+      </div>
+      <div><button class="primary" onclick="addExpense()">➕ إضافة مصروف</button></div>
+
+      <h3 style="margin-top:16px">قائمة المصروفات</h3>
+      <ul id="expensesList" class="table-list"></ul>
+    </div>
+
+    <div class="card">
+      <h2>إضافة إيراد</h2>
+      <div class="controls">
+        <input type="text" id="incReason" placeholder="سبب الإيراد">
+        <input type="number" id="incAmount" placeholder="القيمة">
+      </div>
+      <div><button class="primary" onclick="addIncome()">➕ إضافة إيراد</button></div>
+
+      <h3 style="margin-top:16px">قائمة الإيرادات</h3>
+      <ul id="incomesList" class="table-list"></ul>
+    </div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js";
+    import { getDatabase, ref, push, set, onValue, remove } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-database.js";
+
+    const firebaseConfig = {
+      apiKey: "YOUR_API_KEY",
+      authDomain: "ebaastore25.firebaseapp.com",
+      databaseURL: "https://ebaastore25-default-rtdb.europe-west1.firebasedatabase.app/",
+      projectId: "ebaastore25",
+      storageBucket: "ebaastore25.appspot.com",
+      messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+      appId: "YOUR_APP_ID"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    function addExpense(){
+      const reason = document.getElementById("expReason").value.trim();
+      const amount = Number(document.getElementById("expAmount").value);
+      if(!reason || isNaN(amount)) return;
+      const newRef = push(ref(db, "expenses"));
+      set(newRef, { reason, amount, date: new Date().toLocaleString() });
+      document.getElementById("expReason").value = "";
+      document.getElementById("expAmount").value = "";
+    }
+
+    function addIncome(){
+      const reason = document.getElementById("incReason").value.trim();
+      const amount = Number(document.getElementById("incAmount").value);
+      if(!reason || isNaN(amount)) return;
+      const newRef = push(ref(db, "incomes"));
+      set(newRef, { reason, amount, date: new Date().toLocaleString() });
+      document.getElementById("incReason").value = "";
+      document.getElementById("incAmount").value = "";
+    }
+
+    function deleteNode(path, id){
+      remove(ref(db, `${path}/${id}`));
+    }
+
+    function loadExpenses(){
+      const r = ref(db, "expenses");
+      onValue(r, (snap) => {
+        const ul = document.getElementById("expensesList");
+        ul.innerHTML = "";
+        if(!snap.exists()) return;
+        snap.forEach(child => {
+          const d = child.val();
+          const li = document.createElement("li");
+          li.innerHTML = `<div style="text-align:right;">
+            <div><strong>${d.reason}</strong> — ${d.date}</div>
+            <div>${d.amount} </div>
+          </div>
+          <div><button class="ghost" onclick="deleteNode('expenses','${child.key}')">❌ حذف</button></div>`;
+          ul.appendChild(li);
+        });
+      });
+    }
+
+    function loadIncomes(){
+      const r = ref(db, "incomes");
+      onValue(r, (snap) => {
+        const ul = document.getElementById("incomesList");
+        ul.innerHTML = "";
+        if(!snap.exists()) return;
+        snap.forEach(child => {
+          const d = child.val();
+          const li = document.createElement("li");
+          li.innerHTML = `<div style="text-align:right;">
+            <div><strong>${d.reason}</strong> — ${d.date}</div>
+            <div>${d.amount}</div>
+          </div>
+          <div><button class="ghost" onclick="deleteNode('incomes','${child.key}')">❌ حذف</button></div>`;
+          ul.appendChild(li);
+        });
+      });
+    }
+
+    window.deleteNode = deleteNode;
+
+    loadExpenses();
+    loadIncomes();
+  </script>
+</body>
+</html>

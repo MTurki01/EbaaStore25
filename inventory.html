@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+  <meta charset="utf-8">
+  <title>المخزون - EbaaStore25</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="wrapper">
+    <header class="card">
+      <h1>المخزون</h1>
+      <nav>
+        <a href="index.html">الرئيسية</a>
+        <a href="inventory.html">المخزون</a>
+        <a href="orders.html">الطلبيات</a>
+        <a href="finances.html">المصروفات والإيرادات</a>
+      </nav>
+    </header>
+
+    <div class="card">
+      <h2>إضافة صنف جديد</h2>
+      <div class="controls">
+        <input type="text" id="prodName" placeholder="اسم المنتج">
+        <input type="number" id="prodQty" placeholder="العدد">
+        <input type="number" id="prodPrice" placeholder="السعر">
+        <input type="file" id="prodImage" accept="image/*">
+      </div>
+      <div>
+        <button class="primary" onclick="addProduct()">➕ إضافة المنتج</button>
+      </div>
+      <div id="invMsg" class="alert"></div>
+    </div>
+
+    <div class="card">
+      <h2>قائمة المنتجات</h2>
+      <div id="productList" class="products-grid"></div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js";
+    import { getDatabase, ref, push, set, onValue, remove, update } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-database.js";
+    import { getStorage, ref as sRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-storage.js";
+
+    const firebaseConfig = {
+      apiKey: "YOUR_API_KEY",
+      authDomain: "ebaastore25.firebaseapp.com",
+      databaseURL: "https://ebaastore25-default-rtdb.europe-west1.firebasedatabase.app/",
+      projectId: "ebaastore25",
+      storageBucket: "ebaastore25.appspot.com",
+      messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+      appId: "YOUR_APP_ID"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+    const storage = getStorage(app);
+
+    async function addProduct(){
+      const name = document.getElementById("prodName").value.trim();
+      const qty = Number(document.getElementById("prodQty").value);
+      const price = Number(document.getElementById("prodPrice").value);
+      const file = document.getElementById("prodImage").files[0];
+
+      if(!name || isNaN(qty) || isNaN(price) || !file){
+        document.getElementById("invMsg").innerText = "الرجاء إدخال الاسم والعدد والسعر واختيار صورة.";
+        return;
+      }
+
+      document.getElementById("invMsg").innerText = "جارٍ الرفع...";
+
+      const fileRef = sRef(storage, "products/" + Date.now() + "-" + file.name);
+      await uploadBytes(fileRef, file);
+      const imageURL = await getDownloadURL(fileRef);
+
+      const newRef = push(ref(db, "inventory"));
+      await set(newRef, { name, quantity: qty, price, image: imageURL });
+
+      document.getElementById("prodName").value = "";
+      document.getElementById("prodQty").value = "";
+      document.getElementById("prodPrice").value = "";
+      document.getElementById("prodImage").value = "";
+      document.getElementById("invMsg").innerText = "تمت إضافة المنتج ✅";
+    }
+
+    function deleteProduct(id){
+      remove(ref(db, "inventory/" + id));
+    }
+
+    function changeQty(id, delta){
+      const r = ref(db, "inventory/" + id);
+      // نقرأ القيمة الحالية ثم نحدّثها
+      onValue(r, (snap) => {
+        if(!snap.exists()) return;
+        const current = Number(snap.val().quantity || 0);
+        const next = current + delta;
+        if(next <= 0){
+          // حذف تلقائي مع رسالة تأكيد
+          if(confirm("الكمية أصبحت صفر. هل تريد حذف المنتج نهائياً؟")){
+            remove(r);
+          } else {
+            // لو رفض المستخدم نرجع لا شيء
+          }
+        } else {
+          update(r, { quantity: next });
+        }
+      }, { onlyOnce: true });
+    }
+
+    function loadProducts(){
+      const productsRef = ref(db, "inventory");
+      onValue(productsRef, (snap) => {
+        const list = document.getElementById("productList");
+        list.innerHTML = "";
+        if(!snap.exists()) return;
+        snap.forEach(child => {
+          const data = child.val();
+          const id = child.key;
+          const div = document.createElement("div");
+          div.className = "product";
+          div.innerHTML = `
+            <img src="${data.image}" alt="${data.name}">
+            <h3>${data.name}</h3>
+            <p class="small">السعر: ${data.price}</p>
+            <p>العدد: ${data.quantity}</p>
+            <div class="q-controls">
+              <button class="ghost" onclick="changeQty('${id}', -1)">-</button>
+              <button class="ghost" onclick="changeQty('${id}', 1)">+</button>
+              <button class="ghost" onclick="deleteProduct('${id}')">❌ حذف</button>
+            </div>
+          `;
+          list.appendChild(div);
+        });
+      });
+    }
+
+    // ربط الدوال للنطاق العالمي
+    window.addProduct = addProduct;
+    window.deleteProduct = deleteProduct;
+    window.changeQty = changeQty;
+
+    loadProducts();
+  </script>
+</body>
+</html>
