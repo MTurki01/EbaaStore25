@@ -47,14 +47,14 @@
     import { getDatabase, ref, push, set, onValue, remove } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-database.js";
 
     const firebaseConfig = {
-     apiKey: "AIzaSyDvz2YRGo4YVXIJPkeaquhKBBpr8Hia-PA",
-  authDomain: "ebaastore25.firebaseapp.com",
-  databaseURL: "https://ebaastore25-default-rtdb.europe-west1.firebasedatabase.app/",
-  projectId: "ebaastore25",
-  storageBucket: "ebaastore25.firebasestorage.app",
-  messagingSenderId: "204776755293",
-  appId: "1:204776755293:web:05fb5690dfc7cc026b7db4",
-  measurementId: "G-CGQWYLKMYK"
+      apiKey: "AIzaSyDvz2YRGo4YVXIJPkeaquhKBBpr8Hia-PA",
+      authDomain: "ebaastore25.firebaseapp.com",
+      databaseURL: "https://ebaastore25-default-rtdb.europe-west1.firebasedatabase.app/",
+      projectId: "ebaastore25",
+      storageBucket: "ebaastore25.firebasestorage.app",
+      messagingSenderId: "204776755293",
+      appId: "1:204776755293:web:05fb5690dfc7cc026b7db4",
+      measurementId: "G-CGQWYLKMYK"
     };
 
     const app = initializeApp(firebaseConfig);
@@ -121,15 +121,19 @@
         });
       });
     }
+
+    // ربط الدوال بالنطاق العالمي
     window.addExpense = addExpense;
     window.addIncome = addIncome;
     window.deleteNode = deleteNode;
 
+    // تحميل البيانات عند فتح الصفحة
     loadExpenses();
     loadIncomes();
   </script>
 </body>
 </html>
+
 
 
 
