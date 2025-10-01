@@ -49,7 +49,7 @@
     const firebaseConfig = {
      apiKey: "AIzaSyDvz2YRGo4YVXIJPkeaquhKBBpr8Hia-PA",
   authDomain: "ebaastore25.firebaseapp.com",
-  databaseURL: "https://ebaastore25-default-rtdb.europe-west1.firebasedatabase.app",
+  databaseURL: "https://ebaastore25-default-rtdb.europe-west1.firebasedatabase.app/",
   projectId: "ebaastore25",
   storageBucket: "ebaastore25.firebasestorage.app",
   messagingSenderId: "204776755293",
@@ -121,7 +121,8 @@
         });
       });
     }
-
+    window.addExpense = addExpense;
+    window.addIncome = addIncome;
     window.deleteNode = deleteNode;
 
     loadExpenses();
@@ -129,5 +130,6 @@
   </script>
 </body>
 </html>
+
 
 
