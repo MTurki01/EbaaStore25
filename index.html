@@ -49,11 +49,9 @@
   </div>
 
   <script type="module">
-    // ✅ استيراد Firebase
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js";
     import { getDatabase, ref, get, child } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-database.js";
 
-    // ✅ إعداد Firebase
     const firebaseConfig = {
       apiKey: "AIzaSyDvz2YRGo4YVXIJPkeaquhKBBpr8Hia-PA",
       authDomain: "ebaastore25.firebaseapp.com",
@@ -68,42 +66,44 @@
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
 
-    // ✅ دالة لحساب الصافي
     async function calculateNet() {
+      const dbRef = ref(db);
+      let totalExp = 0, totalInc = 0;
+
       try {
-        const dbRef = ref(db);
-        const expSnap = await get(child(dbRef, "expenses"));
-        const incSnap = await get(child(dbRef, "incomes"));
+        const [expSnap, incSnap] = await Promise.all([
+          get(child(dbRef, "expenses")),
+          get(child(dbRef, "incomes"))
+        ]);
 
-        let totalExp = 0;
-        let totalInc = 0;
-
-        // جمع جميع المصروفات
         if (expSnap.exists()) {
-          const expenses = Object.values(expSnap.val());
-          totalExp = expenses.reduce((sum, e) => sum + Number(e.amount || 0), 0);
+          expSnap.forEach(s => {
+            const val = parseFloat(s.val().amount);
+            if (!isNaN(val)) totalExp += val;
+          });
         }
 
-        // جمع جميع الإيرادات
         if (incSnap.exists()) {
-          const incomes = Object.values(incSnap.val());
-          totalInc = incomes.reduce((sum, i) => sum + Number(i.amount || 0), 0);
+          incSnap.forEach(s => {
+            const val = parseFloat(s.val().amount);
+            if (!isNaN(val)) totalInc += val;
+          });
         }
 
         const net = totalInc - totalExp;
-
-        document.getElementById("netResult").innerText = `📈 الصافي: ${net} د.ل`;
-      } catch (error) {
-        document.getElementById("netResult").innerText = "حدث خطأ أثناء الحساب ⚠️";
-        console.error("Firebase error:", error);
+        document.getElementById("netResult").innerText = `📈 الصافي: ${net} دينار`;
+      } catch (e) {
+        document.getElementById("netResult").innerText = "حدث خطأ في الاتصال بقاعدة البيانات ❌";
+        console.error(e);
       }
     }
 
-    // ✅ ربط الزر بالدالة
     document.getElementById("calcNetBtn").addEventListener("click", calculateNet);
   </script>
 </body>
 </html>
+
+
 
 
 
