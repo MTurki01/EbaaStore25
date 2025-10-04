@@ -3,14 +3,13 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-  <title> EbaaStore - الرئيسية</title>
+  <title>EbaaStore - الرئيسية</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <div class="wrapper">
     <header class="card">
-      <h1 style="color:#3a2230"> EbaaStore</h1>
+      <h1 style="color:#3a2230">EbaaStore</h1>
       <nav>
         <a href="index.html">الرئيسية</a>
         <a href="inventory.html">المخزون</a>
@@ -21,7 +20,7 @@
 
     <div class="card">
       <h2 style="color:#6a3944">المخزون</h2>
-      <p class="small">ادارة المنتجات — أضف أو عدّل في صفحة المخزون</p>
+      <p class="small">إدارة المنتجات — أضف أو عدّل في صفحة المخزون</p>
       <div class="center-row">
         <a class="primary" href="inventory.html"><button class="primary">فتح المخزون</button></a>
       </div>
@@ -49,20 +48,18 @@
   </div>
 
   <script type="module">
-    // Firebase imports
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js";
     import { getDatabase, ref, get, child } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-database.js";
 
-    // ضع مفاتيحك الحقيقية هنا (apiKey و appId وغيرها)
     const firebaseConfig = {
       apiKey: "AIzaSyDvz2YRGo4YVXIJPkeaquhKBBpr8Hia-PA",
-  authDomain: "ebaastore25.firebaseapp.com",
-  databaseURL: "https://ebaastore25-default-rtdb.europe-west1.firebasedatabase.app",
-  projectId: "ebaastore25",
-  storageBucket: "ebaastore25.firebasestorage.app",
-  messagingSenderId: "204776755293",
-  appId: "1:204776755293:web:05fb5690dfc7cc026b7db4",
-  measurementId: "G-CGQWYLKMYK"
+      authDomain: "ebaastore25.firebaseapp.com",
+      databaseURL: "https://ebaastore25-default-rtdb.europe-west1.firebasedatabase.app",
+      projectId: "ebaastore25",
+      storageBucket: "ebaastore25.appspot.com",
+      messagingSenderId: "204776755293",
+      appId: "1:204776755293:web:05fb5690dfc7cc026b7db4",
+      measurementId: "G-CGQWYLKMYK"
     };
 
     const app = initializeApp(firebaseConfig);
@@ -70,17 +67,24 @@
 
     async function calculateNet(){
       const dbRef = ref(db);
-      const expSnap = await get(child(dbRef, "expenses"));
-      const incSnap = await get(child(dbRef, "incomes"));
+
+      // المسارات الجديدة داخل finances
+      const expSnap = await get(child(dbRef, "finances/expenses"));
+      const incSnap = await get(child(dbRef, "finances/incomes"));
+
       let totalExp = 0, totalInc = 0;
-      if(expSnap.exists()){
+
+      if (expSnap.exists()) {
         expSnap.forEach(s => totalExp += Number(s.val().amount || 0));
       }
-      if(incSnap.exists()){
+      if (incSnap.exists()) {
         incSnap.forEach(s => totalInc += Number(s.val().amount || 0));
       }
+
       const net = totalInc - totalExp;
-      document.getElementById("netResult").innerText = `الصافي: ${net}`;
+      const resultBox = document.getElementById("netResult");
+      resultBox.innerText = `💰 الصافي: ${net} د.ل`;
+      resultBox.style.color = net >= 0 ? "green" : "red";
     }
 
     document.getElementById("calcNetBtn").addEventListener("click", calculateNet);
