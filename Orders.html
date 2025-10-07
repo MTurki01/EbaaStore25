@@ -3,7 +3,6 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
   <title>الطلبيات - EbaaStore25</title>
   <link rel="stylesheet" href="style.css">
 </head>
@@ -14,14 +13,26 @@
       <nav>
         <a href="index.html">الرئيسية</a>
         <a href="inventory.html">المخزون</a>
-        <a href="Orders.html">الطلبيات</a>
+        <a href="orders.html">الطلبيات</a>
         <a href="finances.html">المصروفات والإيرادات</a>
       </nav>
     </header>
 
     <div class="card">
       <h2>اختيار منتجات للطلب</h2>
-      <p class="small">ضع الكمية المطلوبة لكل منتج ثم أدخل اسم الزبون واضغط تأكيد</p>
+      <p class="small">اختر القسم من القائمة لعرض المنتجات المتاحة، ثم ضع الكمية المطلوبة لكل منتج وأدخل اسم الزبون.</p>
+
+      <!-- ComboBox لاختيار القسم -->
+      <div class="controls">
+        <select id="orderCategory">
+          <option value="">اختر القسم</option>
+          <option value="حقائب">حقائب</option>
+          <option value="كفرات">كفرات</option>
+          <option value="اكسسوارات">اكسسوارات</option>
+          <option value="مكياج">مكياج</option>
+          <option value="أخرى">أخرى</option>
+        </select>
+      </div>
 
       <div id="orderProducts" class="products-grid"></div>
 
@@ -41,45 +52,48 @@
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js";
-    import { getDatabase, ref, onValue, push, set, update, get, child } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-database.js";
+    import { getDatabase, ref, onValue, push, set, update, get } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-database.js";
 
     const firebaseConfig = {
-   apiKey: "AIzaSyDvz2YRGo4YVXIJPkeaquhKBBpr8Hia-PA",
-  authDomain: "ebaastore25.firebaseapp.com",
-  databaseURL: "https://ebaastore25-default-rtdb.europe-west1.firebasedatabase.app",
-  projectId: "ebaastore25",
-  storageBucket: "ebaastore25.firebasestorage.app",
-  messagingSenderId: "204776755293",
-  appId: "1:204776755293:web:05fb5690dfc7cc026b7db4",
-  measurementId: "G-CGQWYLKMYK"
+      apiKey: "YOUR_API_KEY",
+      authDomain: "ebaastore25.firebaseapp.com",
+      databaseURL: "https://ebaastore25-default-rtdb.europe-west1.firebasedatabase.app",
+      projectId: "ebaastore25",
+      storageBucket: "ebaastore25.appspot.com",
+      messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+      appId: "YOUR_APP_ID"
     };
 
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
 
-    let productsCache = {}; // cache للمنتجات
+    let productsCache = {};
 
-    function loadOrderProducts(){
+    // تحميل المنتجات حسب القسم المختار
+    function loadOrderProducts(category){
       const pRef = ref(db, "inventory");
       onValue(pRef, (snap) => {
         const container = document.getElementById("orderProducts");
         container.innerHTML = "";
         productsCache = {};
         if(!snap.exists()) return;
+
         snap.forEach(child => {
           const id = child.key;
           const data = child.val();
-          productsCache[id] = data;
-          const div = document.createElement("div");
-          div.className = "product";
-          div.innerHTML = `
-            <img src="${data.image}" alt="${data.name}">
-            <h3>${data.name}</h3>
-            <p class="small">السعر: ${data.price}</p>
-            <p>المتاح: ${data.quantity}</p>
-            <input type="number" min="0" value="0" id="order_qty_${id}" style="width:70px; text-align:center;">
-          `;
-          container.appendChild(div);
+          if(data.category === category){
+            productsCache[id] = data;
+            const div = document.createElement("div");
+            div.className = "product";
+            div.innerHTML = `
+              <h3>${data.name}</h3>
+              <p class="small">الكود: ${data.code}</p>
+              <p class="small">السعر: ${data.price}</p>
+              <p>المتاح: ${data.quantity}</p>
+              <input type="number" min="0" value="0" id="order_qty_${id}" style="width:70px; text-align:center;">
+            `;
+            container.appendChild(div);
+          }
         });
       });
     }
@@ -91,7 +105,6 @@
         return;
       }
 
-      // جمع العناصر المطلوبة
       const items = [];
       let total = 0;
       for(const id in productsCache){
@@ -112,8 +125,7 @@
         return;
       }
 
-      // عملية التحديث: نقص الكميات ثم حفظ الطلب
-      // أولاً نحدث كل منتج
+      // تحديث الكميات
       for(const it of items){
         const prodRef = ref(db, `inventory/${it.id}`);
         const snap = await get(prodRef);
@@ -124,14 +136,13 @@
         const current = Number(snap.val().quantity || 0);
         const next = current - it.qty;
         if(next <= 0){
-          // نحذف العقدة
-          await set(prodRef, null); // مساوي للحذف
+          await set(prodRef, null);
         } else {
           await update(prodRef, { quantity: next });
         }
       }
 
-      // حفظ الطلب في orders
+      // حفظ الطلب
       const newRef = push(ref(db, "orders"));
       await set(newRef, {
         customer,
@@ -142,14 +153,13 @@
 
       document.getElementById("orderMsg").innerText = "تم تأكيد الطلب ✅";
       document.getElementById("customerName").value = "";
-      // إعادة تعبئة الكميات للصفر
       for(const it of items){
         const el = document.getElementById(`order_qty_${it.id}`);
         if(el) el.value = 0;
       }
     }
 
-    // load orders list
+    // تحميل سجل الطلبيات
     function loadOrders(){
       const oRef = ref(db, "orders");
       onValue(oRef, (snap) => {
@@ -170,9 +180,18 @@
       });
     }
 
+    // عند تغيير القسم من الكومبوبوكس
+    document.getElementById("orderCategory").addEventListener("change", (e) => {
+      const category = e.target.value;
+      if(category){
+        loadOrderProducts(category);
+      } else {
+        document.getElementById("orderProducts").innerHTML = "";
+      }
+    });
+
     window.confirmOrder = confirmOrder;
 
-    loadOrderProducts();
     loadOrders();
   </script>
 </body>
