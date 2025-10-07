@@ -185,3 +185,31 @@ button.ghost:hover{
   .product h3{ font-size:14px; }
   .q-controls button{ padding:5px; font-size:13px; }
 }
+
+/* responsive */
+@media (max-width:540px){
+  input[type="text"], input[type="number"]{ width:100%; }
+  .product{ width:100%; }
+}
+select {
+  width: 100%;
+  padding: 10px;
+  border: 2px solid var(--accent); /* نفس لون الأزرار */
+  border-radius: 8px;
+  background-color: var(--main-pink); /* نفس خلفية خفيفة */
+  color: var(--text); /* لون النص */
+  font-size: 16px;
+  cursor: pointer;
+  outline: none;
+  transition: 0.3s;
+}
+
+select:hover {
+  background-color: var(--accent-2); /* لون أفتح عند التمرير */
+}
+
+select:focus {
+  border-color: var(--accent); 
+  box-shadow: 0 0 6px rgba(216, 107, 134, 0.5); /* ظل خفيف */
+}
+
