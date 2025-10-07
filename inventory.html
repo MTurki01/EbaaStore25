@@ -1,133 +1,339 @@
 <!DOCTYPE html>
 <html lang="ar">
 <head>
-  <meta charset="utf-8">
-  <title>المخزون - EbaaStore25</title>
-  <link rel="stylesheet" href="style.css">
+<meta charset="utf-8">
+<title>المخزون - EbaaStore25</title>
+<link rel="stylesheet" href="style.css">
+<style>
+:root{
+  --main-purple: #6C4370;
+  --accent: #87588A;
+  --accent-2: #9F6D99;
+  --accent-3: #B78AA7;
+  --background: #E0C9C9;
+  --text: #2b2b2b;
+  --white: #ffffff;
+}
+
+*{box-sizing:border-box;}
+body{
+  margin:0;
+  font-family:"Arial",sans-serif;
+  background: var(--background);
+  color: var(--text);
+  display:flex;
+  justify-content:center;
+  padding:20px;
+}
+.wrapper{width:100%; max-width: 940px; text-align:center;}
+
+/* Header + Navbar */
+header{
+  background: linear-gradient(90deg, var(--main-purple), var(--accent-2));
+  padding: 18px;
+  border-radius: 10px;
+  margin-bottom: 12px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.06);
+}
+header h1{ margin:0; color: #4e4e4e; font-size:26px; letter-spacing:0.5px; }
+nav{ margin-top:10px; display:flex; flex-wrap:wrap; justify-content:center; gap:6px; }
+nav a{
+  color:#686868;
+  text-decoration:none;
+  margin:0;
+  background: rgba(255,255,255,0.15);
+  padding:8px 12px;
+  border-radius:8px;
+  font-weight:600;
+  transition: all 0.2s ease;
+}
+nav a:hover{ background: rgba(255,255,255,0.3); transform: translateY(-1px); }
+
+/* Section buttons (الأقسام) */
+.section-buttons{
+  display:flex;
+  flex-wrap:wrap;
+  justify-content:center;
+  gap:8px;
+  margin:12px 0;
+}
+.section-buttons button{
+  background: var(--accent-2);
+  border:none;
+  color:white;
+  padding:8px 14px;
+  border-radius:8px;
+  cursor:pointer;
+  font-weight:600;
+  transition: all 0.2s ease;
+}
+.section-buttons button:hover{ background: var(--accent-3); transform: translateY(-2px); }
+
+/* Cards */
+.card{
+  background: #fff;
+  padding:18px;
+  border-radius:10px;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.05);
+  margin-bottom:18px;
+  width:100%;
+}
+
+/* Inputs & Buttons */
+.controls{ display:flex; flex-wrap:wrap; justify-content:center; gap:10px; margin-bottom:12px; }
+input[type="text"], input[type="number"], input[type="file"]{
+  padding:10px;
+  border-radius:8px;
+  border:1px solid #e6e6e6;
+  flex: 1 1 150px;
+  max-width:220px;
+  text-align:center;
+}
+button.primary{
+  background: var(--accent-2);
+  border:none;
+  color:white;
+  padding:10px 16px;
+  border-radius:8px;
+  cursor:pointer;
+  font-weight:600;
+  flex:1 1 100px;
+}
+button.ghost{
+  background:transparent;
+  border:1px solid var(--accent);
+  color:var(--accent);
+  padding:8px 12px;
+  border-radius:8px;
+  cursor:pointer;
+  transition: all 0.2s ease;
+}
+button.ghost:hover{
+  background: var(--accent);
+  color: var(--white);
+}
+
+/* Product grid */
+.products-grid{
+  display:flex;
+  flex-wrap:wrap;
+  justify-content:center;
+  gap:14px;
+  padding-top:8px;
+}
+.product{
+  flex:1 1 220px;
+  max-width:220px;
+  background: var(--accent-2);
+  color:#fff;
+  border-radius:10px;
+  padding:12px;
+  text-align:center;
+  border:1px solid #87588A;
+  display:flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+.product h3{ margin:8px 0 6px 0; font-size:16px; }
+.product p{ margin:4px 0; font-weight:600; }
+.product .small{ font-size:13px; color:#f3e8f0; }
+
+/* Quantity buttons */
+.q-controls{
+  display:flex;
+  gap:6px;
+  justify-content:center;
+  margin-top:8px;
+  flex-wrap:wrap;
+}
+.q-controls button{
+  padding:6px 8px;
+  border-radius:6px;
+  border:none;
+  cursor:pointer;
+  flex:1 1 40%;
+  background:#fff;
+  color: var(--accent-2);
+  font-weight:600;
+  transition: 0.2s;
+}
+.q-controls button:hover{ background: #f3e8f0; }
+
+/* Responsive */
+@media(max-width:768px){
+  .controls{ flex-direction: column; align-items:center; }
+  input, button.primary{ width: 90%; max-width:220px; }
+  nav{ flex-direction: column; }
+  .product{ flex:1 1 100%; max-width:100%; }
+  .q-controls button{ flex:1 1 45%; margin-bottom:4px; }
+}
+@media(max-width:480px){
+  header h1{ font-size:22px; }
+  nav a{ padding:6px 10px; font-size:14px; }
+  input, button{ padding:8px; font-size:14px; }
+  .product h3{ font-size:14px; }
+  .q-controls button{ padding:5px; font-size:13px; }
+}
+</style>
 </head>
 <body>
-  <div class="wrapper">
-    <header class="card">
-      <h1>المخزون</h1>
-      <nav>
-        <a href="index.html">الرئيسية</a>
-        <a href="inventory.html">المخزون</a>
-        <a href="Orders.html">الطلبيات</a>
-        <a href="finances.html">المصروفات والإيرادات</a>
-      </nav>
-    </header>
+<div class="wrapper">
+  <header class="card">
+    <h1>المخزون - EbaaStore25</h1>
+    <nav>
+      <a href="index.html">الرئيسية</a>
+      <a href="inventory.html">المخزون</a>
+      <a href="Orders.html">الطلبيات</a>
+      <a href="finances.html">المصروفات والإيرادات</a>
+    </nav>
+  </header>
 
-    <div class="card">
-      <h2>إضافة صنف جديد</h2>
-      <div class="controls">
-        <input type="text" id="prodName" placeholder="اسم المنتج">
-        <input type="number" id="prodQty" placeholder="العدد">
-        <input type="number" id="prodPrice" placeholder="السعر">
-      </div>
-      <div>
-        <button class="primary" onclick="addProduct()">➕ إضافة المنتج</button>
-      </div>
-      <div id="invMsg" class="alert"></div>
-    </div>
-
-    <div class="card">
-      <h2>قائمة المنتجات</h2>
-      <div id="productList" class="products-grid"></div>
-    </div>
+  <!-- أزرار الأقسام -->
+  <div class="section-buttons">
+    <button onclick="scrollToSection('حقائب')">حقائب</button>
+    <button onclick="scrollToSection('موبايل')">موبايل</button>
+    <button onclick="scrollToSection('كفرات')">كفرات</button>
+    <button onclick="scrollToSection('اكسسوارات')">اكسسوارات</button>
+    <button onclick="scrollToSection('مكياج')">مكياج</button>
+    <button onclick="scrollToSection('أخرى')">أخرى</button>
   </div>
 
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js";
-    import { getDatabase, ref, push, set, onValue, remove, update } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-database.js";
+  <div class="card upload-area">
+    <h3>استيراد ملف Excel (.xlsx)</h3>
+    <input id="excelFile" type="file" accept=".xlsx,.xls" />
+    <br/>
+    <button onclick="importExcel()" class="primary">📤 رفع واستيراد</button>
+    <p id="uploadMsg" class="alert"></p>
+  </div>
 
-    const firebaseConfig = {
-     apiKey: "AIzaSyDvz2YRGo4YVXIJPkeaquhKBBpr8Hia-PA",
+  <div id="productsContainer"></div>
+</div>
+
+<!-- مكتبة XLSX -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js";
+import { getDatabase, ref, push, set, onValue, remove, update, get } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-database.js";
+
+// CONFIG
+const firebaseConfig = {
+  apiKey: "AIzaSyDvz2YRGo4YVXIJPkeaquhKBBpr8Hia-PA",
   authDomain: "ebaastore25.firebaseapp.com",
   databaseURL: "https://ebaastore25-default-rtdb.europe-west1.firebasedatabase.app",
   projectId: "ebaastore25",
   storageBucket: "ebaastore25.firebasestorage.app",
   messagingSenderId: "204776755293",
-  appId: "1:204776755293:web:05fb5690dfc7cc026b7db4",
-  measurementId: "G-CGQWYLKMYK"
-    };
+  appId: "1:204776755293:web:05fb5690dfc7cc026b7db4"
+};
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
 
-    const app = initializeApp(firebaseConfig);
-    const db = getDatabase(app);
+const canonicalSections = ["حقائب","موبايل","كفرات","اكسسوارات","مكياج","أخرى"];
 
-    async function addProduct(){
-      const name = document.getElementById("prodName").value.trim();
-      const qty = Number(document.getElementById("prodQty").value);
-      const price = Number(document.getElementById("prodPrice").value);
+function normalizeString(s){ if(!s) return ""; return String(s).trim(); }
+function parseNumberCell(v){ if(!v) return 0; const n=parseFloat(String(v).replace(/[^\d,.\-]/g,"").replace(",",".")); return isNaN(n)?0:n; }
+function mapToCanonicalCategory(str){
+  const s = normalizeString(str).toLowerCase();
+  if(!s) return "أخرى";
+  if(s.includes("حقي") || s.includes("شنط") || s.includes("شنطه") || s.includes("حقيبة")) return "حقائب";
+  if(s.includes("موبايل") || s.includes("هاتف") || s.includes("mobile") || s.includes("phone")) return "موبايل";
+  if(s.includes("كفر") || s.includes("جراب") || s.includes("cover")) return "كفرات";
+  if(s.includes("اكس") || s.includes("إكس") || s.includes("access")) return "اكسسوارات";
+  if(s.includes("مكياج") || s.includes("تجميل") || s.includes("makeup")) return "مكياج";
+  return s||"أخرى";
+}
 
-      if(!name || isNaN(qty) || isNaN(price)){
-        document.getElementById("invMsg").innerText = "الرجاء إدخال الاسم والعدد والسعر.";
-        return;
-      }
+window.importExcel = async function(){
+  const input = document.getElementById("excelFile");
+  const file = input.files[0];
+  const msg = document.getElementById("uploadMsg");
+  msg.innerText = "";
+  if(!file){ msg.innerText = "اختر ملف Excel (.xlsx) أولاً."; return; }
 
-      document.getElementById("invMsg").innerText = "جارٍ الإضافة...";
+  try{
+    const arrayBuffer = await file.arrayBuffer();
+    const workbook = XLSX.read(arrayBuffer,{type:'array'});
+    const sheet = workbook.Sheets[workbook.SheetNames[0]];
+    const rows = XLSX.utils.sheet_to_json(sheet,{header:1,defval:""});
+    if(rows.length<=1){ msg.innerText="الملف فارغ أو ليس بصيغة صحيحة."; return; }
+    const fallback = { name:1, notes:2, qty:3, category:4, color:5, code:6, price:7 };
 
-      const newRef = push(ref(db, "inventory"));
-      await set(newRef, { name, quantity: qty, price });
-
-      document.getElementById("prodName").value = "";
-      document.getElementById("prodQty").value = "";
-      document.getElementById("prodPrice").value = "";
-      document.getElementById("invMsg").innerText = "تمت إضافة المنتج ✅";
+    let added = 0;
+    for(let r=1;r<rows.length;r++){
+      const row = rows[r]||[];
+      const name=normalizeString(row[fallback.name]||"");
+      if(!name) continue;
+      const notes=normalizeString(row[fallback.notes]||"");
+      const qty=parseNumberCell(row[fallback.qty]);
+      const category=mapToCanonicalCategory(row[fallback.category]||"");
+      const color=normalizeString(row[fallback.color]||"");
+      const code=normalizeString(row[fallback.code]||"");
+      const price=parseNumberCell(row[fallback.price]);
+      const newRef = push(ref(db,"inventory"));
+      await set(newRef,{name,notes,quantity:qty,category,color,code,price});
+      added++;
     }
+    msg.innerText=`✅ تم استيراد ${added} منتجًا بنجاح.`;
+    input.value="";
+  }catch(err){ console.error(err); msg.innerText="حدث خطأ أثناء قراءة الملف."; }
+};
 
-    function deleteProduct(id){
-      remove(ref(db, "inventory/" + id));
-    }
+function renderProducts(sectionsOrder=canonicalSections){
+  const container = document.getElementById("productsContainer");
+  container.innerHTML="";
+  sectionsOrder.forEach(sec=>{
+    const div = document.createElement("div");
+    div.className="section card";
+    div.id=sec;
+    div.innerHTML=`<h2>${sec} <span class="count" id="count-${sec}">(0)</span></h2><div class="products-grid" id="grid-${sec}"></div>`;
+    container.appendChild(div);
+  });
+}
 
-    function changeQty(id, delta){
-      const r = ref(db, "inventory/" + id);
-      onValue(r, (snap) => {
-        if(!snap.exists()) return;
-        const current = Number(snap.val().quantity || 0);
-        const next = current + delta;
-        if(next <= 0){
-          if(confirm("الكمية أصبحت صفر. هل تريد حذف المنتج نهائياً؟")){
-            remove(r);
-          }
-        } else {
-          update(r, { quantity: next });
-        }
-      }, { onlyOnce: true });
-    }
+function loadAndDisplay(){
+  renderProducts();
+  const pRef = ref(db,"inventory");
+  onValue(pRef,(snap)=>{
+    const counts={};
+    canonicalSections.forEach(s=>counts[s]=0);
+    canonicalSections.forEach(sec=>{ const g=document.getElementById("grid-"+sec); if(g) g.innerHTML=""; });
+    if(!snap.exists()) return;
+    snap.forEach(child=>{
+      const id=child.key;
+      const p=child.val();
+      const cat=mapToCanonicalCategory(p.category||p.type||"");
+      const sec=canonicalSections.includes(cat)?cat:"أخرى";
+      const grid=document.getElementById("grid-"+sec);
+      if(!grid) return;
+      const card=document.createElement("div");
+      card.className="product";
+      card.innerHTML=`<h3>${p.name}</h3>
+        <div class="small">${p.notes||""}</div>
+        <div>الكمية: <strong>${p.quantity}</strong> — السعر: <strong>${p.price}</strong> LYD</div>
+        <div>اللون: ${p.color||"-"} — الكود: ${p.code||"-"}</div>
+        <div class="q-controls">
+          <button class="ghost" onclick="decrease('${id}',1)">-</button>
+          <button class="ghost" onclick="increase('${id}',1)">+</button>
+          <button class="ghost" onclick="deleteProduct('${id}')">حذف</button>
+        </div>`;
+      grid.appendChild(card);
+      counts[sec]=(counts[sec]||0)+1;
+    });
+    canonicalSections.forEach(sec=>{
+      const el=document.getElementById("count-"+sec);
+      if(el) el.textContent=`(${counts[sec]||0})`;
+    });
+  });
+}
 
-    function loadProducts(){
-      const productsRef = ref(db, "inventory");
-      onValue(productsRef, (snap) => {
-        const list = document.getElementById("productList");
-        list.innerHTML = "";
-        if(!snap.exists()) return;
-        snap.forEach(child => {
-          const data = child.val();
-          const id = child.key;
-          const div = document.createElement("div");
-          div.className = "product";
-          div.innerHTML = `
-            <h3>${data.name}</h3>
-            <p class="small">السعر: ${data.price}</p>
-            <p>العدد: ${data.quantity}</p>
-            <div class="q-controls">
-              <button class="ghost" onclick="changeQty('${id}', -1)">-</button>
-              <button class="ghost" onclick="changeQty('${id}', 1)">+</button>
-              <button class="ghost" onclick="deleteProduct('${id}')">❌ حذف</button>
-            </div>
-          `;
-          list.appendChild(div);
-        });
-      });
-    }
+window.deleteProduct=function(id){ if(confirm("هل تريد حذف هذا المنتج نهائياً؟")) remove(ref(db,"inventory/"+id)); };
+window.decrease=function(id,n){ if(!n||n<=0) n=1; const r=ref(db,"inventory/"+id); onValue(r,snap=>{ if(!snap.exists()) return; const cur=Number(snap.val().quantity||0); const next=cur-n; if(next<=0){ if(confirm("الكمية ستصبح صفر. حذف المنتج؟")) remove(r); } else update(r,{quantity:next}); },{onlyOnce:true}); };
+window.increase=function(id,n){ if(!n||n<=0) n=1; const r=ref(db,"inventory/"+id); onValue(r,snap=>{ if(!snap.exists()) return; const cur=Number(snap.val().quantity||0); update(r,{quantity:cur+n}); },{onlyOnce:true}); };
+window.scrollToSection=function(id){ const el=document.getElementById(id); if(el) el.scrollIntoView({behavior:"smooth"}); };
 
-    // ربط الدوال للنطاق العالمي
-    window.addProduct = addProduct;
-    window.deleteProduct = deleteProduct;
-    window.changeQty = changeQty;
-
-    loadProducts();
-  </script>
+renderProducts();
+loadAndDisplay();
+</script>
 </body>
 </html>
 
