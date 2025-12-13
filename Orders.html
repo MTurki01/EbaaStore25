@@ -195,7 +195,7 @@ function normalizeString(s){ return s? String(s).trim() : ""; }
 function mapToCategory(str){
   const s = normalizeString(str).toLowerCase();
   if(!s) return "أخرى";
-  if(s.includes("حقي") || s.includes("شنط")) return "حقائب";
+  if(s.includes("حقائب") || s.includes("شنط")) return "حقائب";
   if(s.includes("موبايل") || s.includes("هاتف")) return "موبايل";
   if(s.includes("كفر") || s.includes("جراب")) return "كفرات";
   if(s.includes("اكس") || s.includes("إكس")) return "اكسسوارات";
@@ -327,6 +327,7 @@ loadOrders();
 </script>
 </body>
 </html>
+
 
 
 
