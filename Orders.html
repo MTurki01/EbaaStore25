@@ -152,7 +152,6 @@ button.primary{ background: var(--accent-2); color:#fff; border:none; padding:8p
   <div class="section-buttons">
     <button onclick="filterCategory('حقائب')">حقائب</button>
     <button onclick="filterCategory('موبايل')">موبايل</button>
-    <button onclick="filterCategory('كفرات')">كفرات</button>
     <button onclick="filterCategory('اكسسوارات')">اكسسوارات</button>
     <button onclick="filterCategory('مكياج')">مكياج</button>
     <button onclick="filterCategory('أخرى')">أخرى</button>
@@ -188,7 +187,7 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
-const sections = ["حقائب","موبايل","كفرات","اكسسوارات","مكياج","أخرى"];
+const sections = ["حقائب","موبايل","اكسسوارات","مكياج","أخرى"];
 let productsCache = {};
 
 function normalizeString(s){ return s? String(s).trim() : ""; }
@@ -197,7 +196,6 @@ function mapToCategory(str){
   if(!s) return "أخرى";
   if(s.includes("حقائب") || s.includes("شنط")) return "حقائب";
   if(s.includes("موبايل") || s.includes("هاتف")) return "موبايل";
-  if(s.includes("كفر") || s.includes("جراب")) return "كفرات";
   if(s.includes("اكس") || s.includes("إكس")) return "اكسسوارات";
   if(s.includes("مكياج") || s.includes("تجميل")) return "مكياج";
   return "أخرى";
@@ -327,6 +325,7 @@ loadOrders();
 </script>
 </body>
 </html>
+
 
 
 
