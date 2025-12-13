@@ -1,201 +1,333 @@
 <!DOCTYPE html>
 <html lang="ar">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>الطلبيات - EbaaStore25</title>
-  <link rel="stylesheet" href="style.css">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>الطلبيات - EbaaStore25</title>
+<style>
+:root{
+  --main-purple: #6C4370;
+  --accent: #87588A;
+  --accent-2: #9F6D99;
+  --accent-3: #B78AA7;
+  --background: #E0C9C9;
+  --text: #2b2b2b;
+  --white: #ffffff;
+}
+
+*{box-sizing:border-box;}
+body{
+  margin:0;
+  font-family:"Arial",sans-serif;
+  background: var(--background);
+  color: var(--text);
+  display:flex;
+  justify-content:center;
+  padding:20px;
+}
+.wrapper{width:100%; max-width: 940px; text-align:center;}
+
+header{
+  background: linear-gradient(90deg, var(--main-purple), var(--accent-2));
+  padding: 18px;
+  border-radius: 10px;
+  margin-bottom: 12px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.06);
+}
+header h1{ margin:0; color: #4e4e4e; font-size:26px; letter-spacing:0.5px; }
+nav{ margin-top:10px; display:flex; flex-wrap:wrap; justify-content:center; gap:6px; }
+nav a{
+  color:#686868;
+  text-decoration:none;
+  margin:0;
+  background: rgba(255,255,255,0.15);
+  padding:8px 12px;
+  border-radius:8px;
+  font-weight:600;
+  transition: all 0.2s ease;
+}
+nav a:hover{ background: rgba(255,255,255,0.3); transform: translateY(-1px); }
+
+.section-buttons{
+  display:flex;
+  flex-wrap:wrap;
+  justify-content:center;
+  gap:8px;
+  margin:12px 0;
+}
+.section-buttons button{
+  background: var(--accent-2);
+  border:none;
+  color:white;
+  padding:8px 14px;
+  border-radius:8px;
+  cursor:pointer;
+  font-weight:600;
+  transition: all 0.2s ease;
+}
+.section-buttons button:hover{ background: var(--accent-3); transform: translateY(-2px); }
+
+.card{
+  background: #fff;
+  padding:18px;
+  border-radius:10px;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.05);
+  margin-bottom:18px;
+  width:100%;
+}
+
+.products-grid{
+  display:flex;
+  flex-wrap:wrap;
+  justify-content:center;
+  gap:14px;
+  padding-top:8px;
+}
+.product{
+  flex:1 1 160px;
+  max-width:160px;
+  background: var(--accent-2);
+  color:#fff;
+  border-radius:10px;
+  padding:8px;
+  text-align:center;
+  border:1px solid #87588A;
+  display:flex;
+  flex-direction: column;
+  justify-content: space-between;
+  font-size:13px;
+}
+.product h3{ margin:6px 0 4px 0; font-size:14px; }
+.product p{ margin:4px 0; font-weight:600; }
+.product .small{ font-size:12px; color:#f3e8f0; }
+
+.q-controls{
+  display:flex;
+  gap:6px;
+  justify-content:center;
+  margin-top:6px;
+  flex-wrap:wrap;
+}
+.q-controls button{
+  padding:4px 6px;
+  border-radius:6px;
+  border:none;
+  cursor:pointer;
+  flex:1 1 40%;
+  background:#fff;
+  color: var(--accent-2);
+  font-weight:600;
+  font-size:12px;
+  transition: 0.2s;
+}
+.q-controls button:hover{ background: #f3e8f0; }
+
+input[type="text"]{ padding:8px; border-radius:6px; border:1px solid #ccc; margin-right:6px; }
+button.primary{ background: var(--accent-2); color:#fff; border:none; padding:8px 14px; border-radius:6px; cursor:pointer; font-weight:600; }
+.alert{color:red; margin-top:6px; font-weight:600; text-align:center;}
+.table-list{list-style:none; padding:0;}
+.table-list li{margin-bottom:10px; background:#f3e8f0; padding:8px; border-radius:6px; text-align:right; font-size:13px;}
+
+@media(max-width:480px){
+  .product{flex:1 1 45%; max-width:45%; padding:6px; font-size:12px;}
+  .product h3{font-size:13px;}
+  .q-controls button{padding:3px 5px; font-size:11px;}
+  .products-grid{gap:6px;}
+}
+</style>
 </head>
 <body>
-  <div class="wrapper">
-    <header class="card">
-      <h1>الطلبيات</h1>
-      <nav>
-        <a href="index.html">الرئيسية</a>
-        <a href="inventory.html">المخزون</a>
-        <a href="Orders.html">الطلبيات</a>
-        <a href="finances.html">المصروفات والإيرادات</a>
-      </nav>
-    </header>
+<div class="wrapper">
+  <header class="card">
+    <h1>الطلبيات</h1>
+    <nav>
+      <a href="index.html">الرئيسية</a>
+      <a href="inventory.html">المخزون</a>
+      <a href="Orders.html">الطلبيات</a>
+      <a href="finances.html">المصروفات والإيرادات</a>
+    </nav>
+  </header>
 
-    <div class="card">
-      <h2>اختيار منتجات للطلب</h2>
-      <p class="small">اختر القسم من القائمة لعرض المنتجات المتاحة، ثم ضع الكمية المطلوبة لكل منتج وأدخل اسم الزبون.</p>
-
-      <!-- ComboBox لاختيار القسم -->
-      <div class="controls">
-        <select id="orderCategory">
-          <option value="">اختر القسم</option>
-          <option value="حقائب">حقائب</option>
-          <option value="كفرات">كفرات</option>
-          <option value="اكسسوارات">اكسسوارات</option>
-          <option value="مكياج">مكياج</option>
-          <option value="أخرى">أخرى</option>
-        </select>
-      </div>
-
-      <div id="orderProducts" class="products-grid"></div>
-
-      <div style="margin-top:12px;">
-        <input type="text" id="customerName" placeholder="اسم الزبون">
-        <button class="primary" onclick="confirmOrder()">✅ تأكيد الطلب</button>
-      </div>
-
-      <div id="orderMsg" class="alert"></div>
-    </div>
-
-    <div class="card">
-      <h2>سجل الطلبيات</h2>
-      <ul id="ordersList" class="table-list"></ul>
-    </div>
+  <!-- أزرار الأقسام -->
+  <div class="section-buttons">
+    <button onclick="filterCategory('حقائب')">حقائب</button>
+    <button onclick="filterCategory('موبايل')">موبايل</button>
+    <button onclick="filterCategory('كفرات')">كفرات</button>
+    <button onclick="filterCategory('اكسسوارات')">اكسسوارات</button>
+    <button onclick="filterCategory('مكياج')">مكياج</button>
+    <button onclick="filterCategory('أخرى')">أخرى</button>
   </div>
 
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js";
-    import { getDatabase, ref, onValue, push, set, update, get } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-database.js";
+  <div id="productsContainer"></div>
 
-    const firebaseConfig = {
-      apiKey: "YOUR_API_KEY",
-      authDomain: "ebaastore25.firebaseapp.com",
-      databaseURL: "https://ebaastore25-default-rtdb.europe-west1.firebasedatabase.app",
-      projectId: "ebaastore25",
-      storageBucket: "ebaastore25.appspot.com",
-      messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-      appId: "YOUR_APP_ID"
-    };
+  <div class="card">
+    <input type="text" id="customerName" placeholder="اسم الزبون">
+    <button class="primary" onclick="confirmOrder()">✅ تأكيد الطلب</button>
+    <div id="orderMsg" class="alert"></div>
+  </div>
 
-    const app = initializeApp(firebaseConfig);
-    const db = getDatabase(app);
+  <div class="card">
+    <h2>سجل الطلبيات</h2>
+    <ul id="ordersList" class="table-list"></ul>
+  </div>
+</div>
 
-    let productsCache = {};
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js";
+import { getDatabase, ref, push, set, onValue, update, get } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-database.js";
 
-    // تحميل المنتجات حسب القسم المختار
-    function loadOrderProducts(category){
-      const pRef = ref(db, "inventory");
-      onValue(pRef, (snap) => {
-        const container = document.getElementById("orderProducts");
-        container.innerHTML = "";
-        productsCache = {};
-        if(!snap.exists()) return;
+const firebaseConfig = {
+  apiKey: "YOUR_API_KEY",
+  authDomain: "ebaastore25.firebaseapp.com",
+  databaseURL: "https://ebaastore25-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "ebaastore25",
+  storageBucket: "ebaastore25.appspot.com",
+  messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+  appId: "YOUR_APP_ID"
+};
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
 
-        snap.forEach(child => {
-          const id = child.key;
-          const data = child.val();
-          if(data.category === category){
-            productsCache[id] = data;
-            const div = document.createElement("div");
-            div.className = "product";
-            div.innerHTML = `
-              <h3>${data.name}</h3>
-              <p class="small">الكود: ${data.code}</p>
-              <p class="small">السعر: ${data.price}</p>
-              <p>المتاح: ${data.quantity}</p>
-              <input type="number" min="0" value="0" id="order_qty_${id}" style="width:70px; text-align:center;">
-            `;
-            container.appendChild(div);
-          }
-        });
-      });
-    }
+const sections = ["حقائب","موبايل","كفرات","اكسسوارات","مكياج","أخرى"];
+let productsCache = {};
 
-    async function confirmOrder(){
-      const customer = document.getElementById("customerName").value.trim();
-      if(!customer){
-        document.getElementById("orderMsg").innerText = "الرجاء إدخال اسم الزبون.";
-        return;
-      }
+function normalizeString(s){ return s? String(s).trim() : ""; }
+function mapToCategory(str){
+  const s = normalizeString(str).toLowerCase();
+  if(!s) return "أخرى";
+  if(s.includes("حقي") || s.includes("شنط")) return "حقائب";
+  if(s.includes("موبايل") || s.includes("هاتف")) return "موبايل";
+  if(s.includes("كفر") || s.includes("جراب")) return "كفرات";
+  if(s.includes("اكس") || s.includes("إكس")) return "اكسسوارات";
+  if(s.includes("مكياج") || s.includes("تجميل")) return "مكياج";
+  return "أخرى";
+}
 
-      const items = [];
-      let total = 0;
-      for(const id in productsCache){
-        const q = Number(document.getElementById(`order_qty_${id}`)?.value || 0);
-        if(q > 0){
-          const prod = productsCache[id];
-          if(q > prod.quantity){
-            document.getElementById("orderMsg").innerText = `الكمية المطلوبة للمنتج "${prod.name}" أكبر من المتاح.`;
-            return;
-          }
-          items.push({ id, name: prod.name, qty: q, price: prod.price });
-          total += q * Number(prod.price);
-        }
-      }
+// عرض المنتجات مقسمة حسب الأقسام
+function renderProducts(){
+  const container = document.getElementById("productsContainer");
+  container.innerHTML = "";
+  sections.forEach(sec=>{
+    const div = document.createElement("div");
+    div.className = "card section";
+    div.id = `sec-${sec}`;
+    div.innerHTML = `<h2>${sec}</h2><div class="products-grid" id="grid-${sec}"></div>`;
+    container.appendChild(div);
+  });
 
-      if(items.length === 0){
-        document.getElementById("orderMsg").innerText = "اختر منتجًا واحدًا على الأقل.";
-        return;
-      }
+  const pRef = ref(db,"inventory");
+  onValue(pRef,(snap)=>{
+    productsCache = {};
+    sections.forEach(sec=>{ const g=document.getElementById("grid-"+sec); if(g) g.innerHTML=""; });
+    if(!snap.exists()) return;
 
-      // تحديث الكميات
-      for(const it of items){
-        const prodRef = ref(db, `inventory/${it.id}`);
-        const snap = await get(prodRef);
-        if(!snap.exists()){
-          document.getElementById("orderMsg").innerText = `المنتج ${it.name} غير متاح الآن.`;
-          return;
-        }
-        const current = Number(snap.val().quantity || 0);
-        const next = current - it.qty;
-        if(next <= 0){
-          await set(prodRef, null);
-        } else {
-          await update(prodRef, { quantity: next });
-        }
-      }
+    snap.forEach(child=>{
+      const id = child.key;
+      const p = child.val();
+      const cat = mapToCategory(p.category||p.type||"");
+      const sec = sections.includes(cat)?cat:"أخرى";
+      const grid = document.getElementById("grid-"+sec);
+      if(!grid) return;
+      productsCache[id] = p;
 
-      // حفظ الطلب
-      const newRef = push(ref(db, "orders"));
-      await set(newRef, {
-        customer,
-        items,
-        total,
-        date: new Date().toLocaleString()
-      });
-
-      document.getElementById("orderMsg").innerText = "تم تأكيد الطلب ✅";
-      document.getElementById("customerName").value = "";
-      for(const it of items){
-        const el = document.getElementById(`order_qty_${it.id}`);
-        if(el) el.value = 0;
-      }
-    }
-
-    // تحميل سجل الطلبيات
-    function loadOrders(){
-      const oRef = ref(db, "orders");
-      onValue(oRef, (snap) => {
-        const list = document.getElementById("ordersList");
-        list.innerHTML = "";
-        if(!snap.exists()) return;
-        snap.forEach(child => {
-          const o = child.val();
-          const li = document.createElement("li");
-          li.innerHTML = `<div style="text-align:right;">
-            <strong>${o.customer}</strong> — ${o.date} <br> الإجمالي: ${o.total}
-            <div style="font-size:13px; color:#6b5b5f; margin-top:6px;">
-              ${o.items.map(it => `${it.name} x${it.qty}`).join(" ، ")}
-            </div>
-          </div>`;
-          list.appendChild(li);
-        });
-      });
-    }
-
-    // عند تغيير القسم من الكومبوبوكس
-    document.getElementById("orderCategory").addEventListener("change", (e) => {
-      const category = e.target.value;
-      if(category){
-        loadOrderProducts(category);
-      } else {
-        document.getElementById("orderProducts").innerHTML = "";
-      }
+      const card = document.createElement("div");
+      card.className="product";
+      card.innerHTML=`<h3>${p.name}</h3>
+        <div class="small">${p.notes||""}</div>
+        <div>الكمية المتاحة: <strong>${p.quantity}</strong></div>
+        <div>السعر: <strong>${p.price}</strong> LYD</div>
+        <div class="q-controls">
+          <button onclick="decreaseQty('${id}')">-</button>
+          <input type="number" id="qty-${id}" value="0" min="0" style="width:50px; text-align:center;">
+          <button onclick="increaseQty('${id}')">+</button>
+        </div>`;
+      grid.appendChild(card);
     });
+  });
+}
 
-    window.confirmOrder = confirmOrder;
+// فلترة الأقسام عند الضغط على زر
+window.filterCategory = function(cat){
+  sections.forEach(sec=>{
+    const el = document.getElementById(`sec-${sec}`);
+    if(el) el.style.display = (sec===cat)?'block':'none';
+  });
+}
 
-    loadOrders();
-  </script>
+// تعديل الكمية
+window.increaseQty = function(id){
+  const el = document.getElementById(`qty-${id}`);
+  if(el) el.value = Number(el.value||0)+1;
+}
+window.decreaseQty = function(id){
+  const el = document.getElementById(`qty-${id}`);
+  if(el) el.value = Math.max(0, Number(el.value||0)-1);
+}
+
+// تأكيد الطلب
+window.confirmOrder = async function(){
+  const customer = document.getElementById("customerName").value.trim();
+  if(!customer){ document.getElementById("orderMsg").innerText="أدخل اسم الزبون"; return; }
+
+  const items = [];
+  let total = 0;
+  for(const id in productsCache){
+    const q = Number(document.getElementById(`qty-${id}`)?.value||0);
+    if(q>0){
+      const prod = productsCache[id];
+      if(q>prod.quantity){ document.getElementById("orderMsg").innerText=`الكمية المطلوبة للمنتج "${prod.name}" أكبر من المتاح`; return; }
+      items.push({id,name:prod.name,qty:q,price:prod.price});
+      total += q*Number(prod.price);
+    }
+  }
+  if(items.length===0){ document.getElementById("orderMsg").innerText="اختر منتجًا واحدًا على الأقل"; return; }
+
+  // تحديث الكميات في المخزون
+  for(const it of items){
+    const prodRef = ref(db,`inventory/${it.id}`);
+    const snap = await get(prodRef);
+    if(!snap.exists()){ document.getElementById("orderMsg").innerText=`المنتج ${it.name} غير متاح`; return; }
+    const cur = Number(snap.val().quantity||0);
+    const next = cur - it.qty;
+    if(next<=0){ await set(prodRef,null); } else { await update(prodRef,{quantity:next}); }
+  }
+
+  // حفظ الطلب
+  const newRef = push(ref(db,"orders"));
+  await set(newRef,{customer,items,total,date:new Date().toLocaleString()});
+
+  document.getElementById("orderMsg").innerText="تم تأكيد الطلب ✅";
+  document.getElementById("customerName").value="";
+  for(const it of items){ const el = document.getElementById(`qty-${it.id}`); if(el) el.value=0; }
+}
+
+// عرض سجل الطلبات
+function loadOrders(){
+  const oRef = ref(db,"orders");
+  onValue(oRef,(snap)=>{
+    const list = document.getElementById("ordersList");
+    list.innerHTML="";
+    if(!snap.exists()) return;
+    snap.forEach(child=>{
+      const o = child.val();
+      const li = document.createElement("li");
+      li.innerHTML=`<div style="text-align:right;">
+        <strong>${o.customer}</strong> — ${o.date} <br> الإجمالي: ${o.total} LYD
+        <div style="font-size:13px; color:#6b5b5f; margin-top:6px;">
+          ${o.items.map(it=>`${it.name} x${it.qty}`).join(" ، ")}
+        </div>
+      </div>`;
+      list.appendChild(li);
+    });
+  });
+}
+
+renderProducts();
+loadOrders();
+</script>
 </body>
 </html>
+
 
 
 
