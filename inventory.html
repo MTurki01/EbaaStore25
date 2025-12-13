@@ -237,7 +237,7 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
-const canonicalSections = ["حقائب","موبايل","كفرات","اكسسوارات","مكياج","أخرى"];
+const canonicalSections = ["حقائب","موبايل","اكسسوارات","مكياج","أخرى"];
 
 function normalizeString(s){ return s? String(s).trim() : ""; }
 function parseNumberCell(v){ if(!v) return 0; const n=parseFloat(String(v).replace(/[^\d,.\-]/g,"").replace(",",".")); return isNaN(n)?0:n; }
@@ -246,7 +246,6 @@ function mapToCanonicalCategory(str){
   if(!s) return "أخرى";
   if(s.includes("حقي") || s.includes("شنط") || s.includes("شنطه") || s.includes("حقيبة")) return "حقائب";
   if(s.includes("موبايل") || s.includes("هاتف") || s.includes("mobile") || s.includes("phone")) return "موبايل";
-  if(s.includes("كفر") || s.includes("جراب") || s.includes("cover")) return "كفرات";
   if(s.includes("اكس") || s.includes("إكس") || s.includes("access")) return "اكسسوارات";
   if(s.includes("مكياج") || s.includes("تجميل") || s.includes("makeup")) return "مكياج";
   return s||"أخرى";
@@ -343,6 +342,7 @@ loadAndDisplay();
 </script>
 </body>
 </html>
+
 
 
 
