@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="ar">
 <head>
-   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta charset="utf-8">
 <title>المخزون - EbaaStore25</title>
 <link rel="stylesheet" href="style.css">
@@ -123,32 +123,33 @@ button.ghost:hover{
   padding-top:8px;
 }
 .product{
-  flex:1 1 220px;
-  max-width:220px;
+  flex:1 1 160px;   /* تم تصغيره */
+  max-width:160px;   /* تم تصغيره */
   background: var(--accent-2);
   color:#fff;
   border-radius:10px;
-  padding:12px;
+  padding:8px;       /* تم تصغيره */
   text-align:center;
   border:1px solid #87588A;
   display:flex;
   flex-direction: column;
   justify-content: space-between;
+  font-size:13px;    /* نص أصغر */
 }
-.product h3{ margin:8px 0 6px 0; font-size:16px; }
+.product h3{ margin:6px 0 4px 0; font-size:14px; }
 .product p{ margin:4px 0; font-weight:600; }
-.product .small{ font-size:13px; color:#f3e8f0; }
+.product .small{ font-size:12px; color:#f3e8f0; }
 
 /* Quantity buttons */
 .q-controls{
   display:flex;
   gap:6px;
   justify-content:center;
-  margin-top:8px;
+  margin-top:6px;
   flex-wrap:wrap;
 }
 .q-controls button{
-  padding:6px 8px;
+  padding:4px 6px;   /* تم تصغيره */
   border-radius:6px;
   border:none;
   cursor:pointer;
@@ -156,6 +157,7 @@ button.ghost:hover{
   background:#fff;
   color: var(--accent-2);
   font-weight:600;
+  font-size:12px;    /* تم تصغيره */
   transition: 0.2s;
 }
 .q-controls button:hover{ background: #f3e8f0; }
@@ -168,12 +170,21 @@ button.ghost:hover{
   .product{ flex:1 1 100%; max-width:100%; }
   .q-controls button{ flex:1 1 45%; margin-bottom:4px; }
 }
+
 @media(max-width:480px){
   header h1{ font-size:22px; }
   nav a{ padding:6px 10px; font-size:14px; }
   input, button{ padding:8px; font-size:14px; }
-  .product h3{ font-size:14px; }
-  .q-controls button{ padding:5px; font-size:13px; }
+  .product{
+    flex:1 1 45%;      /* صفين على الهواتف */
+    max-width:45%;
+    padding:6px;
+    font-size:12px;
+  }
+  .product h3{ font-size:13px; margin:4px 0 2px 0; }
+  .product p, .product .small{ font-size:11px; }
+  .q-controls button{ padding:3px 5px; font-size:11px; }
+  .products-grid{ gap:6px; } /* تقليل المسافات */
 }
 </style>
 </head>
@@ -193,7 +204,6 @@ button.ghost:hover{
   <div class="section-buttons">
     <button onclick="scrollToSection('حقائب')">حقائب</button>
     <button onclick="scrollToSection('موبايل')">موبايل</button>
-    <button onclick="scrollToSection('كفرات')">كفرات</button>
     <button onclick="scrollToSection('اكسسوارات')">اكسسوارات</button>
     <button onclick="scrollToSection('مكياج')">مكياج</button>
     <button onclick="scrollToSection('أخرى')">أخرى</button>
@@ -210,13 +220,11 @@ button.ghost:hover{
   <div id="productsContainer"></div>
 </div>
 
-<!-- مكتبة XLSX -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js";
-import { getDatabase, ref, push, set, onValue, remove, update, get } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-database.js";
+import { getDatabase, ref, push, set, onValue, remove, update } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-database.js";
 
-// CONFIG
 const firebaseConfig = {
   apiKey: "AIzaSyDvz2YRGo4YVXIJPkeaquhKBBpr8Hia-PA",
   authDomain: "ebaastore25.firebaseapp.com",
@@ -231,7 +239,7 @@ const db = getDatabase(app);
 
 const canonicalSections = ["حقائب","موبايل","كفرات","اكسسوارات","مكياج","أخرى"];
 
-function normalizeString(s){ if(!s) return ""; return String(s).trim(); }
+function normalizeString(s){ return s? String(s).trim() : ""; }
 function parseNumberCell(v){ if(!v) return 0; const n=parseFloat(String(v).replace(/[^\d,.\-]/g,"").replace(",",".")); return isNaN(n)?0:n; }
 function mapToCanonicalCategory(str){
   const s = normalizeString(str).toLowerCase();
@@ -250,7 +258,6 @@ window.importExcel = async function(){
   const msg = document.getElementById("uploadMsg");
   msg.innerText = "";
   if(!file){ msg.innerText = "اختر ملف Excel (.xlsx) أولاً."; return; }
-
   try{
     const arrayBuffer = await file.arrayBuffer();
     const workbook = XLSX.read(arrayBuffer,{type:'array'});
@@ -258,7 +265,6 @@ window.importExcel = async function(){
     const rows = XLSX.utils.sheet_to_json(sheet,{header:1,defval:""});
     if(rows.length<=1){ msg.innerText="الملف فارغ أو ليس بصيغة صحيحة."; return; }
     const fallback = { name:1, notes:2, qty:3, category:4, color:5, code:6, price:7 };
-
     let added = 0;
     for(let r=1;r<rows.length;r++){
       const row = rows[r]||[];
@@ -337,6 +343,7 @@ loadAndDisplay();
 </script>
 </body>
 </html>
+
 
 
 
