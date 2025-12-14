@@ -169,6 +169,11 @@ button.primary{ background: var(--accent-2); color:#fff; border:none; padding:8p
     <h2>سجل الطلبيات</h2>
     <ul id="ordersList" class="table-list"></ul>
   </div>
+
+  <!-- زر تحويل إلى Excel -->
+  <div class="card">
+    <button class="primary" id="exportExcelBtn">⬇ تحويل إلى Excel</button>
+  </div>
 </div>
 
 <script type="module">
@@ -319,6 +324,52 @@ function loadOrders(){
     });
   });
 }
+
+// زر تصدير Excel
+document.getElementById("exportExcelBtn").addEventListener("click", function() {
+  const lis = document.querySelectorAll("#ordersList li");
+  if(lis.length === 0){
+    alert("لا يوجد طلبيات للتصدير");
+    return;
+  }
+
+  let csvContent = "اسم الزبون,تاريخ الطلب,المنتجات,إجمالي الطلب\n";
+
+  lis.forEach(li => {
+    const mainDiv = li.querySelector("div");          
+    const productsDiv = mainDiv.querySelector("div div"); 
+
+    const customer = mainDiv.querySelector("strong")?.innerText || "";
+
+    // استخراج النص الكامل بعد اسم الزبون
+    let fullText = mainDiv.innerText.replace(customer, "").trim();
+
+    // فصل التاريخ قبل "الإجمالي"
+    let date = "";
+    const totalIndex = fullText.indexOf("الإجمالي:");
+    if(totalIndex > -1){
+      date = fullText.substring(0, totalIndex).trim();
+    }
+
+    const products = productsDiv ? productsDiv.innerText.trim() : "";
+    const totalMatch = mainDiv.innerText.match(/الإجمالي:\s*(\d+)/);
+    const total = totalMatch ? totalMatch[1] : "";
+
+    csvContent += `"${customer}","${date}","${products}","${total}"\n`;
+  });
+
+  const blob = new Blob(["\uFEFF" + csvContent], { type: "text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "Orders.csv";
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+});
+
+
 
 renderProducts();
 loadOrders();
