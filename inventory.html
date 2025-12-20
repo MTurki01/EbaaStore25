@@ -269,14 +269,13 @@ window.importExcel = async function(){
       const row = rows[r]||[];
       const name=normalizeString(row[fallback.name]||"");
       if(!name) continue;
-      const notes=normalizeString(row[fallback.notes]||"");
       const qty=parseNumberCell(row[fallback.qty]);
       const category=mapToCanonicalCategory(row[fallback.category]||"");
       const color=normalizeString(row[fallback.color]||"");
       const code=normalizeString(row[fallback.code]||"");
       const price=parseNumberCell(row[fallback.price]);
       const newRef = push(ref(db,"inventory"));
-      await set(newRef,{name,notes,quantity:qty,category,color,code,price});
+      await set(newRef,{name,quantity:qty,category,color,code,price});
       added++;
     }
     msg.innerText=`✅ تم استيراد ${added} منتجًا بنجاح.`;
@@ -314,7 +313,6 @@ function loadAndDisplay(){
       const card=document.createElement("div");
       card.className="product";
       card.innerHTML=`<h3>${p.name}</h3>
-        <div class="small">${p.notes||""}</div>
         <div>الكمية: <strong>${p.quantity}</strong> — السعر: <strong>${p.price}</strong> LYD</div>
         <div>اللون: ${p.color||"-"} — الكود: ${p.code||"-"}</div>
         <div class="q-controls">
@@ -342,6 +340,7 @@ loadAndDisplay();
 </script>
 </body>
 </html>
+
 
 
 
