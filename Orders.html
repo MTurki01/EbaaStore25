@@ -100,6 +100,7 @@ nav a:hover{ background: rgba(255,255,255,0.3); transform: translateY(-1px); }
 .product h3{ margin:6px 0 4px 0; font-size:14px; }
 .product p{ margin:4px 0; font-weight:600; }
 .product .small{ font-size:12px; color:#f3e8f0; }
+.product-img{ width:100%; height:100px; object-fit:cover; border-radius:6px; margin-bottom:6px; }
 
 .q-controls{
   display:flex;
@@ -122,11 +123,39 @@ nav a:hover{ background: rgba(255,255,255,0.3); transform: translateY(-1px); }
 }
 .q-controls button:hover{ background: #f3e8f0; }
 
-input[type="text"]{ padding:8px; border-radius:6px; border:1px solid #ccc; margin-right:6px; }
+input[type="text"], input[type="tel"], input[type="number"]{
+  padding:8px;
+  border-radius:6px;
+  border:1px solid #ccc;
+  margin:4px 6px;
+}
 button.primary{ background: var(--accent-2); color:#fff; border:none; padding:8px 14px; border-radius:6px; cursor:pointer; font-weight:600; }
 .alert{color:red; margin-top:6px; font-weight:600; text-align:center;}
 .table-list{list-style:none; padding:0;}
 .table-list li{margin-bottom:10px; background:#f3e8f0; padding:8px; border-radius:6px; text-align:right; font-size:13px;}
+
+#scrollTopBtn {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  border: none;
+  background: var(--main-purple);
+  color: white;
+  font-size: 20px;
+  cursor: pointer;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.25);
+  display: none;
+  z-index: 999;
+  transition: opacity 0.3s, transform 0.3s;
+}
+#scrollTopBtn:hover {
+ background: var(--accent-2);
+  transform: translateY(-3px);
+}
+
 
 @media(max-width:480px){
   .product{flex:1 1 45%; max-width:45%; padding:6px; font-size:12px;}
@@ -138,6 +167,8 @@ button.primary{ background: var(--accent-2); color:#fff; border:none; padding:8p
 </head>
 <body>
 <div class="wrapper">
+  <button id="scrollTopBtn" title="العودة للأعلى">⬆</button>
+
   <header class="card">
     <h1>الطلبيات</h1>
     <nav>
@@ -154,6 +185,9 @@ button.primary{ background: var(--accent-2); color:#fff; border:none; padding:8p
     <button onclick="filterCategory('موبايل')">موبايل</button>
     <button onclick="filterCategory('اكسسوارات')">اكسسوارات</button>
     <button onclick="filterCategory('مكياج')">مكياج</button>
+    <button onclick="filterCategory('ملابس')">ملابس</button>
+    <button onclick="filterCategory('منزل')">منزل</button>
+    <button onclick="filterCategory('أفراح')">أفراح</button>
     <button onclick="filterCategory('أخرى')">أخرى</button>
   </div>
 
@@ -161,6 +195,8 @@ button.primary{ background: var(--accent-2); color:#fff; border:none; padding:8p
 
   <div class="card">
     <input type="text" id="customerName" placeholder="اسم الزبون">
+    <input type="tel" id="customerPhone" placeholder="رقم الهاتف">
+    <input type="text" id="customerAddress" placeholder="العنوان">
     <button class="primary" onclick="confirmOrder()">✅ تأكيد الطلب</button>
     <div id="orderMsg" class="alert"></div>
   </div>
@@ -170,15 +206,18 @@ button.primary{ background: var(--accent-2); color:#fff; border:none; padding:8p
     <ul id="ordersList" class="table-list"></ul>
   </div>
 
-  <!-- زر تحويل إلى Excel -->
+  <!-- زر تصدير الطلبات -->
   <div class="card">
     <button class="primary" id="exportExcelBtn">⬇ تحويل إلى Excel</button>
   </div>
 </div>
 
+
+
+
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js";
-import { getDatabase, ref, push, set, onValue, update, get } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-database.js";
+import { getDatabase, ref, push, set, onValue, update, get, remove } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-database.js";
 
 const firebaseConfig = {
   apiKey: "YOUR_API_KEY",
@@ -191,8 +230,38 @@ const firebaseConfig = {
 };
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
+// --- هنا تضيف دالة إرسال التليجرام ---
+const TELEGRAM_BOT_TOKEN = "8380723763:AAHmXFMPzd0OOKnyFtRynYDuOAtwz-tEXk";
+const TELEGRAM_CHAT_ID = "-1003663905830";
 
-const sections = ["حقائب","موبايل","اكسسوارات","مكياج","أخرى"];
+async function sendOrderToTelegram(order) {
+  const { customer, phone, address, items, total } = order;
+
+  let productsText = items.map(it => `${it.name} x${it.qty}`).join("\n");
+
+  const message = `📦 طلب جديد من EbaaStore\n\n` +
+                  `👤 الاسم: ${customer}\n` +
+                  `📞 الرقم: ${phone}\n` +
+                  `🏠 العنوان: ${address}\n` +
+                  `🛒 المنتجات:\n${productsText}\n\n` +
+                  `💰 الإجمالي: ${total} LYD`;
+
+  try {
+    const url = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`;
+    await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        chat_id: TELEGRAM_CHAT_ID,
+        text: message
+      })
+    });
+    console.log("تم إرسال الطلب للتليجرام ✅");
+  } catch (err) {
+    console.error("خطأ في إرسال الرسالة للتليجرام:", err);
+  }
+}
+const sections = ["حقائب","موبايل","اكسسوارات","مكياج","ملابس","منزل","أفراح","أخرى"];
 let productsCache = {};
 
 function normalizeString(s){ return s? String(s).trim() : ""; }
@@ -203,6 +272,9 @@ function mapToCategory(str){
   if(s.includes("موبايل") || s.includes("هاتف")) return "موبايل";
   if(s.includes("اكس") || s.includes("إكس")) return "اكسسوارات";
   if(s.includes("مكياج") || s.includes("تجميل")) return "مكياج";
+  if(s.includes("ملابس")) return "ملابس";
+  if(s.includes("منزل")) return "منزل";
+  if(s.includes("أفراح")) return "أفراح";
   return "أخرى";
 }
 
@@ -235,21 +307,25 @@ function renderProducts(){
 
       const card = document.createElement("div");
       card.className="product";
-      card.innerHTML=`<h3>${p.name}</h3>
-        <div class="small">${p.notes||""}</div>
-        <div>الكمية المتاحة: <strong>${p.quantity}</strong></div>
-        <div>السعر: <strong>${p.price}</strong> LYD</div>
-        <div class="q-controls">
-          <button onclick="decreaseQty('${id}')">-</button>
-          <input type="number" id="qty-${id}" value="0" min="0" style="width:50px; text-align:center;">
-          <button onclick="increaseQty('${id}')">+</button>
-        </div>`;
+     card.innerHTML = `
+  ${p.image ? `<img src="${p.image}" class="product-img" alt="${p.name}">` : ``}
+  <h3>${p.name}</h3>
+  <div class="small">${p.notes||""}</div>
+  <div>الكمية المتاحة: <strong>${p.quantity}</strong></div>
+  <div>السعر: <strong>${p.price}</strong> </div>
+  <div>اللون: <strong>${p.color || "-"}</strong></div>
+  <div class="q-controls">
+    <button onclick="decreaseQty('${id}')">-</button>
+    <input type="number" id="qty-${id}" value="0" min="0" style="width:50px; text-align:center;">
+    <button onclick="increaseQty('${id}')">+</button>
+  </div>`;
+
       grid.appendChild(card);
     });
   });
 }
 
-// فلترة الأقسام عند الضغط على زر
+// فلترة الأقسام
 window.filterCategory = function(cat){
   sections.forEach(sec=>{
     const el = document.getElementById(`sec-${sec}`);
@@ -258,19 +334,17 @@ window.filterCategory = function(cat){
 }
 
 // تعديل الكمية
-window.increaseQty = function(id){
-  const el = document.getElementById(`qty-${id}`);
-  if(el) el.value = Number(el.value||0)+1;
-}
-window.decreaseQty = function(id){
-  const el = document.getElementById(`qty-${id}`);
-  if(el) el.value = Math.max(0, Number(el.value||0)-1);
-}
+window.increaseQty = function(id){ const el=document.getElementById(`qty-${id}`); if(el) el.value=Number(el.value||0)+1; }
+window.decreaseQty = function(id){ const el=document.getElementById(`qty-${id}`); if(el) el.value=Math.max(0, Number(el.value||0)-1); }
 
 // تأكيد الطلب
 window.confirmOrder = async function(){
-  const customer = document.getElementById("customerName").value.trim();
-  if(!customer){ document.getElementById("orderMsg").innerText="أدخل اسم الزبون"; return; }
+  const name = document.getElementById("customerName").value.trim();
+  const phone = document.getElementById("customerPhone").value.trim();
+  const address = document.getElementById("customerAddress").value.trim();
+  if(!name){ alert("أدخل اسم الزبون"); return; }
+  if(!phone){ alert("أدخل رقم الهاتف"); return; }
+  if(!address){ alert("أدخل العنوان"); return; }
 
   const items = [];
   let total = 0;
@@ -278,18 +352,18 @@ window.confirmOrder = async function(){
     const q = Number(document.getElementById(`qty-${id}`)?.value||0);
     if(q>0){
       const prod = productsCache[id];
-      if(q>prod.quantity){ document.getElementById("orderMsg").innerText=`الكمية المطلوبة للمنتج "${prod.name}" أكبر من المتاح`; return; }
+      if(q>prod.quantity){ alert(`الكمية المطلوبة للمنتج "${prod.name}" أكبر من المتاح`); return; }
       items.push({id,name:prod.name,qty:q,price:prod.price});
       total += q*Number(prod.price);
     }
   }
-  if(items.length===0){ document.getElementById("orderMsg").innerText="اختر منتجًا واحدًا على الأقل"; return; }
+  if(items.length===0){ alert("اختر منتجًا واحدًا على الأقل"); return; }
 
   // تحديث الكميات في المخزون
   for(const it of items){
     const prodRef = ref(db,`inventory/${it.id}`);
     const snap = await get(prodRef);
-    if(!snap.exists()){ document.getElementById("orderMsg").innerText=`المنتج ${it.name} غير متاح`; return; }
+    if(!snap.exists()){ alert(`المنتج ${it.name} غير متاح`); return; }
     const cur = Number(snap.val().quantity||0);
     const next = cur - it.qty;
     if(next<=0){ await set(prodRef,null); } else { await update(prodRef,{quantity:next}); }
@@ -297,11 +371,16 @@ window.confirmOrder = async function(){
 
   // حفظ الطلب
   const newRef = push(ref(db,"orders"));
-  await set(newRef,{customer,items,total,date:new Date().toLocaleString()});
+  await set(newRef,{customer:name,phone,address,items,total,date:new Date().toLocaleString()});
+  await sendOrderToTelegram({ customer, phone, address, items, total });
 
-  document.getElementById("orderMsg").innerText="تم تأكيد الطلب ✅";
+  alert("تم تأكيد الطلب ✅");
   document.getElementById("customerName").value="";
-  for(const it of items){ const el = document.getElementById(`qty-${it.id}`); if(el) el.value=0; }
+  document.getElementById("customerPhone").value="";
+  document.getElementById("customerAddress").value="";
+  for(const it of items){ const el=document.getElementById(`qty-${it.id}`); if(el) el.value=0; }
+
+  loadOrders();
 }
 
 // عرض سجل الطلبات
@@ -315,7 +394,7 @@ function loadOrders(){
       const o = child.val();
       const li = document.createElement("li");
       li.innerHTML=`<div style="text-align:right;">
-        <strong>${o.customer}</strong> — ${o.date} <br> الإجمالي: ${o.total} LYD
+        <strong>${o.customer}</strong> — رقم الهاتف: ${o.phone} — العنوان: ${o.address} — ${o.date} <br> الإجمالي: ${o.total} LYD
         <div style="font-size:13px; color:#6b5b5f; margin-top:6px;">
           ${o.items.map(it=>`${it.name} x${it.qty}`).join(" ، ")}
         </div>
@@ -325,37 +404,19 @@ function loadOrders(){
   });
 }
 
-// زر تصدير Excel
-document.getElementById("exportExcelBtn").addEventListener("click", function() {
-  const lis = document.querySelectorAll("#ordersList li");
-  if(lis.length === 0){
-    alert("لا يوجد طلبيات للتصدير");
-    return;
-  }
+// زر تصدير الطلبات
+// زر تصدير الطلبات (Excel)
+document.getElementById("exportExcelBtn").addEventListener("click", async function() {
+  const oRef = ref(db,"orders");
+  const snap = await get(oRef);
+  if(!snap.exists()){ alert("لا يوجد طلبيات للتصدير"); return; }
 
-  let csvContent = "اسم الزبون,تاريخ الطلب,المنتجات,إجمالي الطلب\n";
+  let csvContent = "اسم الزبون,رقم الهاتف,العنوان,تاريخ الطلب,المنتجات,إجمالي الطلب\n";
 
-  lis.forEach(li => {
-    const mainDiv = li.querySelector("div");          
-    const productsDiv = mainDiv.querySelector("div div"); 
-
-    const customer = mainDiv.querySelector("strong")?.innerText || "";
-
-    // استخراج النص الكامل بعد اسم الزبون
-    let fullText = mainDiv.innerText.replace(customer, "").trim();
-
-    // فصل التاريخ قبل "الإجمالي"
-    let date = "";
-    const totalIndex = fullText.indexOf("الإجمالي:");
-    if(totalIndex > -1){
-      date = fullText.substring(0, totalIndex).trim();
-    }
-
-    const products = productsDiv ? productsDiv.innerText.trim() : "";
-    const totalMatch = mainDiv.innerText.match(/الإجمالي:\s*(\d+)/);
-    const total = totalMatch ? totalMatch[1] : "";
-
-    csvContent += `"${customer}","${date}","${products}","${total}"\n`;
+  snap.forEach(child=>{
+    const o = child.val();
+    const productsStr = o.items.map(it=>`${it.name} x${it.qty}`).join(" ، ");
+    csvContent += `"${o.customer}","${o.phone}","${o.address}","${o.date}","${productsStr}","${o.total}"\n`;
   });
 
   const blob = new Blob(["\uFEFF" + csvContent], { type: "text/csv;charset=utf-8;" });
@@ -370,12 +431,35 @@ document.getElementById("exportExcelBtn").addEventListener("click", function() {
 });
 
 
+// زر العودة للأعلى
+// الحصول على الزر
+const scrollBtn = document.getElementById("scrollTopBtn");
+
+// إظهار الزر فقط عند التمرير للأسفل
+window.onscroll = function() {
+  if(document.body.scrollTop > 100 || document.documentElement.scrollTop > 100){
+    scrollBtn.style.display = "block";
+  } else {
+    scrollBtn.style.display = "none";
+  }
+};
+
+// عند الضغط، العودة للأعلى بسلاسة
+scrollBtn.addEventListener("click", function() {
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+});
+
+// إخفاؤه افتراضيًا عند تحميل الصفحة
+scrollBtn.style.display = "none";
 
 renderProducts();
 loadOrders();
 </script>
 </body>
 </html>
+
+
+
 
 
 
