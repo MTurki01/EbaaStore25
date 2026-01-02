@@ -186,6 +186,15 @@ button.ghost:hover{
   .q-controls button{ padding:3px 5px; font-size:11px; }
   .products-grid{ gap:6px; } /* تقليل المسافات */
 }
+.product-img{
+  width:100%;
+  height:120px;
+  object-fit:cover;
+  border-radius:8px;
+  margin-bottom:6px;
+  background:#fff;
+}
+
 </style>
 </head>
 <body>
@@ -263,7 +272,7 @@ window.importExcel = async function(){
     const sheet = workbook.Sheets[workbook.SheetNames[0]];
     const rows = XLSX.utils.sheet_to_json(sheet,{header:1,defval:""});
     if(rows.length<=1){ msg.innerText="الملف فارغ أو ليس بصيغة صحيحة."; return; }
-    const fallback = { name:1, notes:2, qty:3, category:4, color:5, code:6, price:7 };
+    const fallback = { name:1, notes:2, qty:3, category:4, color:5, code:6, price:7, image:8 };
     let added = 0;
     for(let r=1;r<rows.length;r++){
       const row = rows[r]||[];
@@ -273,10 +282,20 @@ window.importExcel = async function(){
       const category=mapToCanonicalCategory(row[fallback.category]||"");
       const color=normalizeString(row[fallback.color]||"");
       const code=normalizeString(row[fallback.code]||"");
-      const price=parseNumberCell(row[fallback.price]);
-      const newRef = push(ref(db,"inventory"));
-      await set(newRef,{name,quantity:qty,category,color,code,price});
-      added++;
+     const price = parseNumberCell(row[fallback.price]);
+     const image = normalizeString(row[fallback.image] || "");
+
+     const newRef = push(ref(db,"inventory"));
+await set(newRef,{
+  name,
+  quantity: qty,
+  category,
+  color,
+  code,
+  price,
+  image
+});
+
     }
     msg.innerText=`✅ تم استيراد ${added} منتجًا بنجاح.`;
     input.value="";
@@ -312,14 +331,17 @@ function loadAndDisplay(){
       if(!grid) return;
       const card=document.createElement("div");
       card.className="product";
-      card.innerHTML=`<h3>${p.name}</h3>
-        <div>الكمية: <strong>${p.quantity}</strong> — السعر: <strong>${p.price}</strong> LYD</div>
-        <div>اللون: ${p.color||"-"} — الكود: ${p.code||"-"}</div>
-        <div class="q-controls">
-          <button class="ghost" onclick="decrease('${id}',1)">-</button>
-          <button class="ghost" onclick="increase('${id}',1)">+</button>
-          <button class="ghost" onclick="deleteProduct('${id}')">حذف</button>
-        </div>`;
+     card.innerHTML=`
+  ${p.image ? `<img src="${p.image}" class="product-img" alt="${p.name}">` : ``}
+  <h3>${p.name}</h3>
+  <div>الكمية: <strong>${p.quantity}</strong> — السعر: <strong>${p.price}</strong> LYD</div>
+  <div>اللون: ${p.color||"-"} — الكود: ${p.code||"-"}</div>
+  <div class="q-controls">
+    <button class="ghost" onclick="decrease('${id}',1)">-</button>
+    <button class="ghost" onclick="increase('${id}',1)">+</button>
+    <button class="ghost" onclick="deleteProduct('${id}')">حذف</button>
+  </div>`;
+
       grid.appendChild(card);
       counts[sec]=(counts[sec]||0)+1;
     });
@@ -340,9 +362,6 @@ loadAndDisplay();
 </script>
 </body>
 </html>
-
-
-
 
 
 
