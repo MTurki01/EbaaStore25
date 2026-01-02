@@ -194,6 +194,46 @@ button.ghost:hover{
   margin-bottom:6px;
   background:#fff;
 }
+#scrollTopBtn{
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  border: none;
+  background: var(--main-purple);
+  color: white;
+  font-size: 20px;
+  cursor: pointer;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.25);
+  display: none;
+  z-index: 999;
+  transition: opacity 0.3s, transform 0.3s;
+}
+#scrollTopBtn:hover{
+  background: var(--accent-2);
+  transform: translateY(-3px);
+}
+
+.import-export-box{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:12px;
+  margin-top:20px;
+}
+.secondary{
+  background: var(--accent-2);
+  border:none;
+  color:white;
+  padding:10px 16px;
+  border-radius:8px;
+  cursor:pointer;
+  font-weight:600;
+  flex:1 1 100px;
+}
+
 
 </style>
 </head>
@@ -215,6 +255,9 @@ button.ghost:hover{
     <button onclick="scrollToSection('موبايل')">موبايل</button>
     <button onclick="scrollToSection('اكسسوارات')">اكسسوارات</button>
     <button onclick="scrollToSection('مكياج')">مكياج</button>
+    <button onclick="scrollToSection('ملابس')">ملابس</button>
+    <button onclick="scrollToSection('المنزل')">المنزل</button>
+    <button onclick="scrollToSection('أفراح')">أفراح</button>
     <button onclick="scrollToSection('أخرى')">أخرى</button>
   </div>
 
@@ -223,6 +266,7 @@ button.ghost:hover{
     <input id="excelFile" type="file" accept=".xlsx,.xls" />
     <br/>
     <button onclick="importExcel()" class="primary">📤 رفع واستيراد</button>
+    <button onclick="exportToExcel()" class="secondary">📥 تصدير المنتجات المتبقية</button>
     <p id="uploadMsg" class="alert"></p>
   </div>
 
@@ -246,7 +290,7 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
-const canonicalSections = ["حقائب","موبايل","اكسسوارات","مكياج","أخرى"];
+const canonicalSections = ["حقائب","موبايل","اكسسوارات","مكياج","ملابس","المنزل","أفراح","أخرى"];
 
 function normalizeString(s){ return s? String(s).trim() : ""; }
 function parseNumberCell(v){ if(!v) return 0; const n=parseFloat(String(v).replace(/[^\d,.\-]/g,"").replace(",",".")); return isNaN(n)?0:n; }
@@ -257,6 +301,9 @@ function mapToCanonicalCategory(str){
   if(s.includes("موبايل") || s.includes("هاتف") || s.includes("mobile") || s.includes("phone")) return "موبايل";
   if(s.includes("اكس") || s.includes("إكس") || s.includes("access")) return "اكسسوارات";
   if(s.includes("مكياج") || s.includes("تجميل") || s.includes("makeup")) return "مكياج";
+  if(s.includes("ملابس") || s.includes("لبس") || s.includes("clothes") || s.includes("fashion")) return "ملابس";
+  if(s.includes("منزل") || s.includes("بيت") || s.includes("home") || s.includes("house")) return "المنزل";
+  if(s.includes("فرح") || s.includes("افراح") || s.includes("زفاف") || s.includes("wedding")) return "أفراح";
   return s||"أخرى";
 }
 
@@ -356,10 +403,53 @@ window.deleteProduct=function(id){ if(confirm("هل تريد حذف هذا ال�
 window.decrease=function(id,n){ if(!n||n<=0) n=1; const r=ref(db,"inventory/"+id); onValue(r,snap=>{ if(!snap.exists()) return; const cur=Number(snap.val().quantity||0); const next=cur-n; if(next<=0){ if(confirm("الكمية ستصبح صفر. حذف المنتج؟")) remove(r); } else update(r,{quantity:next}); },{onlyOnce:true}); };
 window.increase=function(id,n){ if(!n||n<=0) n=1; const r=ref(db,"inventory/"+id); onValue(r,snap=>{ if(!snap.exists()) return; const cur=Number(snap.val().quantity||0); update(r,{quantity:cur+n}); },{onlyOnce:true}); };
 window.scrollToSection=function(id){ const el=document.getElementById(id); if(el) el.scrollIntoView({behavior:"smooth"}); };
+window.exportToExcel = async function(){
+  const pRef = ref(db,"inventory");
+  const snap = await new Promise(resolve => onValue(pRef, resolve, {onlyOnce:true}));
+
+  if(!snap.exists()){
+    alert("لا توجد منتجات لتصديرها");
+    return;
+  }
+
+  const data = [["الاسم","الكمية","التصنيف","اللون","الكود","السعر","الصورة"]];
+
+  snap.forEach(child=>{
+    const p = child.val();
+    data.push([
+      p.name || "",
+      p.quantity || 0,
+      p.category || "",
+      p.color || "",
+      p.code || "",
+      p.price || 0,
+      p.image || ""
+    ]);
+  });
+
+  const ws = XLSX.utils.aoa_to_sheet(data);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, "المخزون");
+
+  XLSX.writeFile(wb, "المخزون_الحالي.xlsx");
+};
 
 renderProducts();
 loadAndDisplay();
+const scrollBtn = document.getElementById("scrollTopBtn");
+
+window.addEventListener("scroll", () => {
+  if (window.scrollY > 300) {
+    scrollBtn.style.display = "block";
+  } else {
+    scrollBtn.style.display = "none";
+  }
+});
+scrollBtn.addEventListener("click", () => {
+  window.scrollTo({ top: 0, behavior: "smooth" });
+});
 </script>
+<button id="scrollTopBtn" title="الرجوع للأعلى">⬆</button>
 </body>
 </html>
 
