@@ -230,37 +230,8 @@ const firebaseConfig = {
 };
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
-// --- هنا تضيف دالة إرسال التليجرام ---
-const TELEGRAM_BOT_TOKEN = "8380723763:AAHmXFMPzd0OOKnyFtRynYDuOAtwz-tEXk";
-const TELEGRAM_CHAT_ID = "-1003663905830";
 
-async function sendOrderToTelegram(order) {
-  const { customer, phone, address, items, total } = order;
 
-  let productsText = items.map(it => `${it.name} x${it.qty}`).join("\n");
-
-  const message = `📦 طلب جديد من EbaaStore\n\n` +
-                  `👤 الاسم: ${customer}\n` +
-                  `📞 الرقم: ${phone}\n` +
-                  `🏠 العنوان: ${address}\n` +
-                  `🛒 المنتجات:\n${productsText}\n\n` +
-                  `💰 الإجمالي: ${total} LYD`;
-
-  try {
-    const url = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`;
-    await fetch(url, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        chat_id: TELEGRAM_CHAT_ID,
-        text: message
-      })
-    });
-    console.log("تم إرسال الطلب للتليجرام ✅");
-  } catch (err) {
-    console.error("خطأ في إرسال الرسالة للتليجرام:", err);
-  }
-}
 const sections = ["حقائب","موبايل","اكسسوارات","مكياج","ملابس","منزل","أفراح","أخرى"];
 let productsCache = {};
 
@@ -457,6 +428,7 @@ loadOrders();
 </script>
 </body>
 </html>
+
 
 
 
