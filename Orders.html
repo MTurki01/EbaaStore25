@@ -326,6 +326,17 @@ window.confirmOrder = async function(){
       if(q>prod.quantity){ alert(`الكمية المطلوبة للمنتج "${prod.name}" أكبر من المتاح`); return; }
       items.push({id,name:prod.name,qty:q,price:prod.price});
       total += q*Number(prod.price);
+        // تنظيف خانات الإدخال
+  document.getElementById("customerName").value = "";
+  document.getElementById("customerPhone").value = "";
+  document.getElementById("customerAddress").value = "";
+
+  // إظهار رسالة تأكيد
+  document.getElementById("orderMsg").textContent = "✅ تم تأكيد الطلب";
+  document.getElementById("orderMsg").style.color = "green";
+
+  return; // إيقاف تنفيذ باقي الدالة
+
     }
   }
   if(items.length===0){ alert("اختر منتجًا واحدًا على الأقل"); return; }
@@ -428,6 +439,7 @@ loadOrders();
 </script>
 </body>
 </html>
+
 
 
 
