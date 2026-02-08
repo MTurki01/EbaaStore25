@@ -335,8 +335,6 @@ window.confirmOrder = async function(){
   document.getElementById("orderMsg").textContent = "✅ تم تأكيد الطلب";
   document.getElementById("orderMsg").style.color = "green";
 
-  return; // إيقاف تنفيذ باقي الدالة
-
     }
   }
   if(items.length===0){ alert("اختر منتجًا واحدًا على الأقل"); return; }
@@ -439,6 +437,7 @@ loadOrders();
 </script>
 </body>
 </html>
+
 
 
 
