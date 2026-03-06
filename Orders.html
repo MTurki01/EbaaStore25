@@ -379,7 +379,7 @@ function loadOrders(){
           ${o.items.map(it=>`${it.name} x${it.qty}`).join(" ، ")}
         </div>
       </div>`;
-      list.appendChild(li);
+    list.prepend(li);
     });
   });
 }
@@ -437,6 +437,7 @@ loadOrders();
 </script>
 </body>
 </html>
+
 
 
 
